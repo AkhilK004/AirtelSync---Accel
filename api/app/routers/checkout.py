@@ -1,4 +1,4 @@
-"""Mock checkout: OTP + order placement. The order state machine and tracker arrive in Phase 6."""
+"""Mock checkout: OTP + order placement (this is the plan's POST /orders). State machine and tracker: app/orders."""
 from __future__ import annotations
 
 import hashlib
@@ -8,12 +8,13 @@ from datetime import date, timedelta
 from fastapi import APIRouter
 from pydantic import BaseModel, Field, field_validator
 
-from app.advisor.models import now_iso
+from app.clock import now_iso
 from app.analytics.events import log_event
 from app.config import MAX_SLOT_DAYS_AHEAD, MOCK_OTP, PAYMENT_MODES, SLOT_WINDOWS, settings
 from app.engine.pricing import build_quote, new_id
 from app.errors import ApiError
 from app.models.engine import QuoteState
+from app.orders import service as orders
 from app.repo import get_repo
 
 router = APIRouter(prefix="/checkout", tags=["checkout"])
@@ -82,6 +83,7 @@ def place_order(body: CheckoutBody):
         "slot": {"date": body.slot_date.isoformat(), "window": body.slot_window}, "payment_mode": body.payment_mode,
         "quote_snapshot": quote.model_dump(mode="json"),  # prices are frozen at order time
     }
+    orders.init_order(order, order["quote_snapshot"])
     repo.put("orders", oid, order)
     log_event("quote_accepted", body.quote_id, {"total_paise": quote.monthly_total_paise})
     log_event("checkout_completed", oid, {"payment_mode": body.payment_mode})

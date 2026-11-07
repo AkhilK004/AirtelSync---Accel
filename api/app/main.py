@@ -7,7 +7,7 @@ from app.config import settings
 from app.data.loaders import get_data
 from app import errors
 from app import logging as pii_logging
-from app.routers import advisor, checkout, consent, health, kyc, mocks, quotes
+from app.routers import admin, advisor, checkout, consent, health, kyc, mocks, orders, quotes
 
 
 @asynccontextmanager
@@ -31,3 +31,5 @@ app.include_router(advisor.router)
 app.include_router(checkout.router)
 app.include_router(consent.router)
 app.include_router(kyc.router)
+app.include_router(orders.router)
+app.include_router(admin.router)

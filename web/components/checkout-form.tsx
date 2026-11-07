@@ -64,6 +64,11 @@ export function CheckoutForm({ quoteId }: { quoteId: string }) {
         quote_id: quoteId, phone, otp, business_name: name, address, pincode: pincode || undefined,
         slot_date: date, slot_window: win, payment_mode: pay, language: locale,
       });
+      try {
+        sessionStorage.setItem(`order:${r.order_id}:last4`, phone.slice(-4)); // lets the tracker open without asking again
+      } catch {
+        /* storage blocked: the tracker will ask for the last 4 digits */
+      }
       router.push(`/${locale}/kyc/${r.order_id}`);
     } catch (e) {
       toast.error(errText(e));

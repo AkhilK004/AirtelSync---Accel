@@ -106,7 +106,12 @@
     "CONSENT_MISSING": "Please give consent first.",
     "CONSENT_REQUIRED": "The two required items must be ticked.",
     "FILE_TOO_LARGE": "File is larger than 5 MB.",
-    "FILE_TYPE": "Use a JPG, PNG or PDF file."
+    "FILE_TYPE": "Use a JPG, PNG or PDF file.",
+    "ORDER_ACCESS": "Those digits do not match this order.",
+    "RESCHEDULE_NOT_ALLOWED": "The slot can no longer be changed.",
+    "ORDER_FINAL": "This order is already complete.",
+    "ILLEGAL_TRANSITION": "That step is not possible right now.",
+    "ADMIN_AUTH": "Demo control is not authorised."
   },
   "kyc": {
     "title": "Document check",
@@ -156,5 +161,35 @@
     "retention": "Photos are read in memory and are not saved, unless a person must review them (deleted within 1 day).",
     "fixRetry": "Fix and re-upload",
     "passed": "{n} checks passed"
+  },
+  "track": {
+    "title": "Track your order",
+    "order": "Order",
+    "activeBy": "Expected active by {date}",
+    "timeline": "Timeline",
+    "messages": "Messages",
+    "products": "Your products",
+    "by": "by {date}",
+    "technician": "Technician",
+    "visit": "Visit",
+    "reschedule": "Reschedule",
+    "rescheduleTitle": "Change install slot",
+    "date": "Date",
+    "window": "Time",
+    "save": "Save new slot",
+    "help": "Need help?",
+    "helpDone": "Callback requested. We will call you soon.",
+    "fixDocs": "Fix my documents",
+    "demoAdvance": "Demo: advance order",
+    "last4Title": "Confirm it is you",
+    "last4Hint": "Enter the last 4 digits of the mobile number you used for this order.",
+    "last4": "Last 4 digits",
+    "show": "Show my order",
+    "refreshing": "Updates every few seconds",
+    "noMessages": "No messages yet.",
+    "whatsapp": "WhatsApp",
+    "sms": "SMS",
+    "installDays": "{days, plural, one {about # day to install} other {about # days to install}}",
+    "live": "Live in minutes"
   }
 }

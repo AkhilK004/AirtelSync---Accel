@@ -1,0 +1,10 @@
+# How each catalogue SKU is fulfilled (PLAN Phase 6). Install lead times come from product_catalogue.csv (typical_install_days).
+# instant_digital: licences / accounts that go live the moment KYC is verified ("live in minutes").
+# Everything else is physical: it follows the install steps (schedule -> technician -> installed -> activated).
+instant_digital:
+  - P14   # Business SMS pack (DLT registration assisted by us)
+  - P15   # WhatsApp Business API starter
+  - P16   # Cloud email & office suite
+  - P17   # Cloud backup
+  - P18   # Website + domain starter
+  - P20   # Endpoint security licences

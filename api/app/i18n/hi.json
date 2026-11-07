@@ -1,11 +1,30 @@
 {
-  "doc": {"gst_certificate": "GST सर्टिफ़िकेट", "udyam_certificate": "उद्यम सर्टिफ़िकेट", "signatory_id": "अधिकृत हस्ताक्षरकर्ता की ID", "address_proof": "पते का प्रमाण (बिजली बिल)"},
+  "doc": {
+    "gst_certificate": "GST सर्टिफ़िकेट",
+    "udyam_certificate": "उद्यम सर्टिफ़िकेट",
+    "signatory_id": "अधिकृत हस्ताक्षरकर्ता की ID",
+    "address_proof": "पते का प्रमाण (बिजली बिल)"
+  },
   "code": {
-    "IMG_QUALITY": "फ़ोटो साफ़ है", "DOC_TYPE": "सही दस्तावेज़", "GSTIN_FORMAT": "GSTIN का फ़ॉर्मेट", "GSTIN_CHECKSUM": "GSTIN का चेक डिजिट",
-    "GSTIN_REGISTRY": "GSTIN रजिस्ट्री में मिला", "GSTIN_STATUS": "GSTIN चालू है", "GSTIN_STATE": "GSTIN का राज्य मेल खाता है", "GSTIN_DECLARED": "GSTIN वही है जो आपने डाला",
-    "CERT_VS_REGISTRY": "सर्टिफ़िकेट रजिस्ट्री से मेल खाता है", "UDYAM_FORMAT": "उद्यम नंबर", "UDYAM_REGISTRY": "उद्यम रजिस्ट्री में मिला", "NAME_MATCH": "बिज़नेस के नाम मेल खाते हैं",
-    "SIGNATORY_MATCH": "हस्ताक्षरकर्ता मालिक से मेल खाता है", "ID_FORMAT": "ID नंबर", "ID_EXPIRY": "ID वैध है", "BILL_RECENCY": "बिल हाल का है", "DATE_LOGIC": "तारीखें सही हैं",
-    "ADDRESS_MATCH": "पता मेल खाता है", "DOC_MISSING": "सभी दस्तावेज़ अपलोड हुए"
+    "IMG_QUALITY": "फ़ोटो साफ़ है",
+    "DOC_TYPE": "सही दस्तावेज़",
+    "GSTIN_FORMAT": "GSTIN का फ़ॉर्मेट",
+    "GSTIN_CHECKSUM": "GSTIN का चेक डिजिट",
+    "GSTIN_REGISTRY": "GSTIN रजिस्ट्री में मिला",
+    "GSTIN_STATUS": "GSTIN चालू है",
+    "GSTIN_STATE": "GSTIN का राज्य मेल खाता है",
+    "GSTIN_DECLARED": "GSTIN वही है जो आपने डाला",
+    "CERT_VS_REGISTRY": "सर्टिफ़िकेट रजिस्ट्री से मेल खाता है",
+    "UDYAM_FORMAT": "उद्यम नंबर",
+    "UDYAM_REGISTRY": "उद्यम रजिस्ट्री में मिला",
+    "NAME_MATCH": "बिज़नेस के नाम मेल खाते हैं",
+    "SIGNATORY_MATCH": "हस्ताक्षरकर्ता मालिक से मेल खाता है",
+    "ID_FORMAT": "ID नंबर",
+    "ID_EXPIRY": "ID वैध है",
+    "BILL_RECENCY": "बिल हाल का है",
+    "DATE_LOGIC": "तारीखें सही हैं",
+    "ADDRESS_MATCH": "पता मेल खाता है",
+    "DOC_MISSING": "सभी दस्तावेज़ अपलोड हुए"
   },
   "msg": {
     "check_ok": "ठीक है।",
@@ -50,5 +69,77 @@
     "ACTION_REQUIRED": "कार्रवाई ज़रूरी: नीचे की बातें ठीक करके फिर से भेजें।",
     "MANUAL_REVIEW": "समीक्षा में है। हमारा कोई व्यक्ति {hours} घंटे में आपके दस्तावेज़ जाँचेगा।",
     "REJECTED": "हम यह आवेदन मंज़ूर नहीं कर सके।"
+  },
+  "order": {
+    "step": {
+      "PLACED": "ऑर्डर दिया गया",
+      "KYC_VERIFIED": "दस्तावेज़ सत्यापित",
+      "INSTALL_SCHEDULED": "इंस्टॉलेशन तय",
+      "TECHNICIAN_ASSIGNED": "टेक्नीशियन तय",
+      "INSTALLED": "इंस्टॉल हो गया",
+      "ACTIVATED": "चालू"
+    },
+    "state": {
+      "PLACED": "ऑर्डर दिया गया",
+      "KYC_PENDING": "दस्तावेज़ जाँच रहे हैं",
+      "KYC_ACTION_REQUIRED": "कार्रवाई ज़रूरी",
+      "KYC_REVIEW": "समीक्षा में",
+      "KYC_VERIFIED": "दस्तावेज़ सत्यापित",
+      "INSTALL_SCHEDULED": "इंस्टॉलेशन तय",
+      "TECHNICIAN_ASSIGNED": "टेक्नीशियन तय",
+      "INSTALLED": "इंस्टॉल हो गया",
+      "ACTIVATED": "चालू",
+      "ON_HOLD": "रोका गया",
+      "CANCELLED": "रद्द"
+    },
+    "side": {
+      "KYC_ACTION_REQUIRED": "आपके दस्तावेज़ों में कुछ ठीक करना है।",
+      "KYC_REVIEW": "हमारी टीम का कोई व्यक्ति आपके दस्तावेज़ जाँच रहा है।",
+      "ON_HOLD": "आपका ऑर्डर रोका गया है। हम आपसे संपर्क करेंगे।",
+      "CANCELLED": "यह ऑर्डर रद्द हो गया।"
+    },
+    "window": {
+      "morning": "सुबह (9–1 बजे)",
+      "evening": "शाम (4–8 बजे)"
+    },
+    "line": {
+      "AWAITING_KYC": "दस्तावेज़ जाँच का इंतज़ार",
+      "PENDING": "दस्तावेज़ जाँच का इंतज़ार",
+      "SCHEDULED": "इंस्टॉल तय",
+      "TECHNICIAN_ASSIGNED": "टेक्नीशियन तय",
+      "INSTALLED": "इंस्टॉल हो गया",
+      "ACTIVATED": "चालू"
+    },
+    "msg": {
+      "order_placed": "ऑर्डर दे दिया गया। अगला कदम: छोटी दस्तावेज़ जाँच।",
+      "kyc_pending": "हम आपके दस्तावेज़ जाँच रहे हैं।",
+      "kyc_action_required": "कार्रवाई ज़रूरी: दस्तावेज़ जाँच की बातें ठीक करके फिर से भेजें।",
+      "kyc_review": "आपके दस्तावेज़ हमारी टीम के पास हैं। {hours} घंटे में अपडेट मिलेगा।",
+      "kyc_verified": "दस्तावेज़ सत्यापित हो गए। धन्यवाद!",
+      "line_activated": "{name} अब चालू है।",
+      "install_scheduled": "इंस्टॉलेशन {date} को तय हुआ, {window}।",
+      "technician_assigned": "{tech} {date} को आएँगे, {window}।",
+      "installed": "इंस्टॉलेशन पूरा हुआ। आपकी सेवाएँ चालू की जा रही हैं।",
+      "activated": "सब तैयार! आपकी सेवाएँ चालू हैं।",
+      "on_hold": "आपका ऑर्डर रोका गया है। हम आपसे संपर्क करेंगे।",
+      "resumed": "आपका ऑर्डर फिर आगे बढ़ रहा है।",
+      "cancelled": "आपका ऑर्डर रद्द हो गया।",
+      "rescheduled": "विज़िट {date} को बदली गई, {window}।",
+      "callback_requested": "कॉलबैक का अनुरोध मिला। हम {hours} घंटे में कॉल करेंगे।"
+    },
+    "months": [
+      "जन॰",
+      "फ़र॰",
+      "मार्च",
+      "अप्रैल",
+      "मई",
+      "जून",
+      "जुल॰",
+      "अग॰",
+      "सित॰",
+      "अक्तू॰",
+      "नव॰",
+      "दिस॰"
+    ]
   }
 }

@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.engine.pricing import EngineError
+from app.orders.state import IllegalTransition
 
 
 class ApiError(Exception):
@@ -19,6 +20,10 @@ def install(app: FastAPI) -> None:
     @app.exception_handler(ApiError)
     async def _api(_: Request, e: ApiError):
         return JSONResponse(_body(e.code, e.message_key, e.params, e.text), status_code=e.status)
+
+    @app.exception_handler(IllegalTransition)
+    async def _ill(_: Request, e: IllegalTransition):
+        return JSONResponse(_body("ILLEGAL_TRANSITION", "order.illegal_transition", {"from": e.src, "to": e.dst}, str(e)), status_code=409)
 
     @app.exception_handler(EngineError)
     async def _eng(_: Request, e: EngineError):

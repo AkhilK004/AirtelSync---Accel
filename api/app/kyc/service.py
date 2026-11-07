@@ -15,6 +15,7 @@ from app.kyc import ids, quality, review_store, validators
 from app.kyc.pipeline import evaluate as run_eval
 from app.kyc.pipeline import process_document
 from app.models.kyc import SLOTS, KycApplication
+from app.orders import service as orders
 from app.repo import get_repo
 
 log = logging.getLogger("kyc")
@@ -30,10 +31,7 @@ def _order(order_id: str) -> dict:
 
 
 def _set_state(order: dict, state: str, **extra) -> None:
-    order["state"] = state
-    order.update(extra)
-    get_repo().put("orders", order["id"], order)
-    log_event("order_state_changed", order["id"], {"state": state})
+    orders.kyc_result(order, state, **extra)  # legal transitions only; ignored once the order left the KYC family
 
 
 def load(order_id: str) -> KycApplication:

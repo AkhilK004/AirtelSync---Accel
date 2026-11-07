@@ -1,11 +1,30 @@
 {
-  "doc": {"gst_certificate": "GST certificate", "udyam_certificate": "Udyam certificate", "signatory_id": "signatory ID", "address_proof": "address proof (utility bill)"},
+  "doc": {
+    "gst_certificate": "GST certificate",
+    "udyam_certificate": "Udyam certificate",
+    "signatory_id": "signatory ID",
+    "address_proof": "address proof (utility bill)"
+  },
   "code": {
-    "IMG_QUALITY": "Photo is clear", "DOC_TYPE": "Right document", "GSTIN_FORMAT": "GSTIN format", "GSTIN_CHECKSUM": "GSTIN check digit",
-    "GSTIN_REGISTRY": "GSTIN found in registry", "GSTIN_STATUS": "GSTIN is active", "GSTIN_STATE": "GSTIN state matches", "GSTIN_DECLARED": "GSTIN matches what you entered",
-    "CERT_VS_REGISTRY": "Certificate matches registry", "UDYAM_FORMAT": "Udyam number", "UDYAM_REGISTRY": "Udyam found in registry", "NAME_MATCH": "Business names match",
-    "SIGNATORY_MATCH": "Signatory matches owner", "ID_FORMAT": "ID number", "ID_EXPIRY": "ID is valid", "BILL_RECENCY": "Bill is recent", "DATE_LOGIC": "Dates make sense",
-    "ADDRESS_MATCH": "Address matches", "DOC_MISSING": "All documents uploaded"
+    "IMG_QUALITY": "Photo is clear",
+    "DOC_TYPE": "Right document",
+    "GSTIN_FORMAT": "GSTIN format",
+    "GSTIN_CHECKSUM": "GSTIN check digit",
+    "GSTIN_REGISTRY": "GSTIN found in registry",
+    "GSTIN_STATUS": "GSTIN is active",
+    "GSTIN_STATE": "GSTIN state matches",
+    "GSTIN_DECLARED": "GSTIN matches what you entered",
+    "CERT_VS_REGISTRY": "Certificate matches registry",
+    "UDYAM_FORMAT": "Udyam number",
+    "UDYAM_REGISTRY": "Udyam found in registry",
+    "NAME_MATCH": "Business names match",
+    "SIGNATORY_MATCH": "Signatory matches owner",
+    "ID_FORMAT": "ID number",
+    "ID_EXPIRY": "ID is valid",
+    "BILL_RECENCY": "Bill is recent",
+    "DATE_LOGIC": "Dates make sense",
+    "ADDRESS_MATCH": "Address matches",
+    "DOC_MISSING": "All documents uploaded"
   },
   "msg": {
     "check_ok": "Looks good.",
@@ -50,5 +69,77 @@
     "ACTION_REQUIRED": "Action required: fix the items below and submit again.",
     "MANUAL_REVIEW": "Under review. A person will check your documents within {hours} hours.",
     "REJECTED": "We could not approve this application."
+  },
+  "order": {
+    "step": {
+      "PLACED": "Order placed",
+      "KYC_VERIFIED": "Documents verified",
+      "INSTALL_SCHEDULED": "Installation scheduled",
+      "TECHNICIAN_ASSIGNED": "Technician assigned",
+      "INSTALLED": "Installed",
+      "ACTIVATED": "Active"
+    },
+    "state": {
+      "PLACED": "Order placed",
+      "KYC_PENDING": "Checking documents",
+      "KYC_ACTION_REQUIRED": "Action needed",
+      "KYC_REVIEW": "Under review",
+      "KYC_VERIFIED": "Documents verified",
+      "INSTALL_SCHEDULED": "Installation scheduled",
+      "TECHNICIAN_ASSIGNED": "Technician assigned",
+      "INSTALLED": "Installed",
+      "ACTIVATED": "Active",
+      "ON_HOLD": "On hold",
+      "CANCELLED": "Cancelled"
+    },
+    "side": {
+      "KYC_ACTION_REQUIRED": "We need you to fix something in your documents.",
+      "KYC_REVIEW": "A person on our team is checking your documents.",
+      "ON_HOLD": "Your order is on hold. We will contact you.",
+      "CANCELLED": "This order was cancelled."
+    },
+    "window": {
+      "morning": "morning (9am–1pm)",
+      "evening": "evening (4pm–8pm)"
+    },
+    "line": {
+      "AWAITING_KYC": "Waiting for document check",
+      "PENDING": "Waiting for document check",
+      "SCHEDULED": "Install scheduled",
+      "TECHNICIAN_ASSIGNED": "Technician assigned",
+      "INSTALLED": "Installed",
+      "ACTIVATED": "Active"
+    },
+    "msg": {
+      "order_placed": "Order placed. Next step: a short document check.",
+      "kyc_pending": "We are checking your documents.",
+      "kyc_action_required": "Action needed: please fix the items in your document check and submit again.",
+      "kyc_review": "Your documents are with our team. Expect an update within {hours} hours.",
+      "kyc_verified": "Documents verified. Thank you!",
+      "line_activated": "{name} is now live.",
+      "install_scheduled": "Installation scheduled for {date}, {window}.",
+      "technician_assigned": "{tech} will visit on {date}, {window}.",
+      "installed": "Installation is done. Activating your services.",
+      "activated": "All set! Your services are active.",
+      "on_hold": "Your order is on hold. We will contact you.",
+      "resumed": "Your order is moving again.",
+      "cancelled": "Your order was cancelled.",
+      "rescheduled": "Visit moved to {date}, {window}.",
+      "callback_requested": "Callback requested. We will call you within {hours} hours."
+    },
+    "months": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ]
   }
 }

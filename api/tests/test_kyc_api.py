@@ -116,7 +116,8 @@ def test_udyam_lookup():
 def test_clean_applicant_approved_and_order_advances():
     oid, r = run("K03")
     assert r["decision"]["status"] == "APPROVED" and r["decision"]["reason_codes"] == []
-    assert get_repo().get("orders", oid)["state"] == "KYC_VERIFIED"
+    o = get_repo().get("orders", oid)
+    assert o["state"] == "INSTALL_SCHEDULED" and "KYC_VERIFIED" in o["history"]  # verified, then install auto-scheduled for the chosen slot
     assert not get_repo().get("kyc_applications", oid)["review_files"]
 
 

@@ -41,7 +41,8 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-const post = <T>(path: string, body?: unknown) => req<T>(path, { method: "POST", body: JSON.stringify(body ?? {}) });
+const post = <T>(path: string, body?: unknown, headers?: Record<string, string>) =>
+  req<T>(path, { method: "POST", body: JSON.stringify(body ?? {}), headers });
 
 // ---- advisor
 export type QuickReply = { label: string; value: string };
@@ -148,3 +149,19 @@ export async function uploadDoc(id: string, slot: string, file: File, lang: stri
   return res.json();
 }
 export const evaluateKyc = (id: string, lang: string) => post<KycView>(`/kyc/${id}/evaluate?lang=${lang}`);
+
+// ---- orders / tracker
+export type TrackStep = { key: string; label: string; status: "done" | "current" | "upcoming"; eta: string | null };
+export type TrackLine = { sku: string; name: string; qty: number; mode: "digital" | "physical"; status: string; status_label: string; eta: string | null; install_days: number };
+export type OrderView = {
+  id: string; state: string; state_label: string; side_state: string | null; side_message: string | null; business_name: string | null;
+  slot: { date: string; window: string; window_label: string }; tech: string | null; steps: TrackStep[]; lines: TrackLine[]; eta_activation: string | null;
+  events: { ts: string; state: string; text: string }[]; messages: { ts: string; channel: "whatsapp" | "sms"; text: string }[];
+  monthly_total_display: string; one_time_total_display: string; can_reschedule: boolean; needs_kyc: boolean; callback_hours: number;
+};
+export const getOrder = (id: string, last4: string, lang: string, track = false) => req<OrderView>(`/orders/${id}?phone_last4=${last4}&lang=${lang}&track=${track}`);
+export const rescheduleOrder = (id: string, last4: string, slot_date: string, slot_window: string, lang: string) =>
+  post<OrderView>(`/orders/${id}/reschedule?lang=${lang}`, { phone_last4: last4, slot_date, slot_window });
+export const orderCallback = (id: string, last4: string) => post<{ lead_id: string }>(`/orders/${id}/callback`, { phone_last4: last4 });
+export const demoAdvance = (id: string, token: string, lang: string) =>
+  post<OrderView>(`/admin/orders/${id}/advance?lang=${lang}`, undefined, { "X-Admin-Token": token });

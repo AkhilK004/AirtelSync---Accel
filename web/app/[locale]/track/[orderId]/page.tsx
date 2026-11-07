@@ -1,6 +1,11 @@
-import { Placeholder } from "@/components/placeholder";
+import { Suspense } from "react";
+import { OrderTracker } from "@/components/order-tracker";
 
 export default async function Page({ params }: PageProps<"/[locale]/track/[orderId]">) {
   const { orderId } = await params;
-  return <Placeholder titleKey="trackTitle" orderId={orderId} />;
+  return (
+    <Suspense>
+      <OrderTracker orderId={orderId} />
+    </Suspense>
+  );
 }
