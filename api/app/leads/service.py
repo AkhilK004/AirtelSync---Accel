@@ -137,14 +137,8 @@ def refresh() -> int:
 
 def _enrich(l: dict) -> dict:
     """Scores, checks compliance and routes a lead once, then persists (so the list is cheap afterwards)."""
-    if l.get("score") is not None and "compliance_hold" in l:
-        return l
-    if l.get("score") is not None:  # scored before the compliance rule existed
-        l["compliance_hold"] = compliance_hold(l)
-        if l["compliance_hold"]:
-            l["route_to"] = "compliance"
-        get_repo().put("leads", l["id"], l)
-        return l
+    if l.get("score") is not None and "compliance_hold" in l and l.get("score_stage") == l["stage_reached"]:
+        return l  # already scored for this stage (a lead that moves to a later stage is re-scored with that stage's model, A64)
     ctx = scoring.context(l)
     prob, reasons = scoring.score_lead(l)
     if not l.get("segment"):
@@ -152,7 +146,7 @@ def _enrich(l: dict) -> dict:
     l["city"] = l.get("city") or ctx.get("city")
     if l["route_to"] != "field_sales":
         l["route_to"], l["partner_code"] = route_for(l["segment"], l.get("partner_code"), l.get("city"))
-    l["score"], l["score_reasons"] = round(prob, 4), reasons
+    l["score"], l["score_reasons"], l["score_stage"] = round(prob, 4), reasons, l["stage_reached"]
     l["compliance_hold"] = compliance_hold(l)
     if l["compliance_hold"]:
         l["route_to"] = "compliance"  # KYC-assist / GST-restoration desk, not a sales queue

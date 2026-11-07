@@ -25,7 +25,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from app.data.loaders import get_data
 from app.leads.features import CATEGORICAL, FEATURES, NUMERIC, build_features
 
-MODEL_VERSION = "propensity-v2"
+MODEL_VERSION = "propensity-v3"
 C_GRID = [0.01, 0.03, 0.1, 0.3, 1.0]
 MIN_CATEGORY_COUNT = 20     # rarer categories are pooled so they cannot get their own noisy weight
 SEED = 42
@@ -129,19 +129,45 @@ for frac in (0.25, 0.5, 0.75, 1.0):
         a.append(roc_auc_score(y[te], make(C=C_t).fit(X.iloc[tr], y[tr]).predict_proba(X.iloc[te])[:, 1]))
     curve.append({"n_train": int(len(y) * 0.8 * frac), "cv_auc": round(float(np.mean(a)), 4)})
 
+# ---------------------------------------------------------------- 4b. stage-aware models (A64)
+# P(activate | lead already reached funnel stage k), k = 1 Contacted .. 4 KYC complete. Same 8 features, rows that reached k only,
+# no class weights (probabilities are natively calibrated), C tuned on log-loss. Compared per stage with the all-leads model on the same rows.
+STAGES = {1: "Contacted", 2: "Needs assessed", 3: "Quote accepted", 4: "KYC complete"}
+rank = L.stage_reached.map({n: i for i, n in enumerate(["Lead", "Contacted", "Needs assessed", "Quote accepted", "KYC complete", "Activated"])}).to_numpy()
+make_stage = lambda C=0.1: Pipeline([("pre", make().named_steps["pre"]), ("clf", LogisticRegression(C=C, max_iter=3000))])
+tuned_stage = lambda: GridSearchCV(make_stage(), {"clf__C": C_GRID}, scoring="neg_log_loss", cv=StratifiedKFold(5, shuffle=True, random_state=SEED))
+stage_metrics, stage_final = {}, {}
+for k, name in STAGES.items():
+    idx = np.where(rank >= k)[0]; yk = y[idx]; Xk = X.iloc[idx]
+    rs = []
+    for tr, te in RepeatedStratifiedKFold(n_splits=5, n_repeats=5, random_state=SEED).split(Xk, yk):
+        g = tuned_stage().fit(Xk.iloc[tr], yk[tr]); ps = g.predict_proba(Xk.iloc[te])[:, 1]
+        train_all = np.setdiff1d(np.arange(len(y)), idx[te])            # all-leads model: every lead except this test fold (as in production)
+        gl = make().fit(X.iloc[train_all], y[train_all])
+        pg = prior_shift(gl.predict_proba(Xk.iloc[te])[:, 1], float(y.mean()))   # exactly what v2 would output for these leads
+        rs.append({"auc": roc_auc_score(yk[te], ps), "auc_global": roc_auc_score(yk[te], pg), "brier": brier_score_loss(yk[te], ps),
+                   "brier_global": brier_score_loss(yk[te], pg), "brier_base": brier_score_loss(yk[te], np.full(len(te), yk[tr].mean())),
+                   "ece": ece(yk[te], ps, bins=5), "ece_global": ece(yk[te], pg, bins=5)})
+    R2 = pd.DataFrame(rs).mean()
+    gk = tuned_stage().fit(Xk, yk); stage_final[str(k)] = gk.best_estimator_
+    stage_metrics[str(k)] = {"stage": name, "n": int(len(idx)), "base_rate": round(float(yk.mean()), 4), "C": gk.best_params_["clf__C"],
+                             **{c: round(float(R2[c]), 4) for c in R2.index}}
+
 # ---------------------------------------------------------------- 5. final model on all rows
 g_all = tuned().fit(X, y); C_final = g_all.best_params_["clf__C"]
 final = g_all.best_estimator_
 metrics = {"model_version": MODEL_VERSION, "features": FEATURES, "C_final": C_final, "nested_cv": cv, "paired_vs_v1": paired,
-           "hgb_cv_auc_mean": round(float(np.mean(hgb)), 4), "time_holdout": time_holdout, "shuffled_label_auc": shuffled_auc, "learning_curve": curve,
+           "hgb_cv_auc_mean": round(float(np.mean(hgb)), 4), "stage_models": stage_metrics, "time_holdout": time_holdout, "shuffled_label_auc": shuffled_auc, "learning_curve": curve,
            "calibration_method": "class_weight=balanced + analytic prior shift to the training base rate"}
 trained_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
 joblib.dump({"pipeline": final, "features": FEATURES, "metrics": metrics, "prior": float(y.mean()), "model_version": MODEL_VERSION,
-             "trained_at": trained_at, "n_rows": int(len(y))}, OUT / "propensity.joblib")
+             "trained_at": trained_at, "n_rows": int(len(y)), "stage_pipelines": stage_final}, OUT / "propensity.joblib")
 json.dump({"model_version": MODEL_VERSION, "categorical": CATEGORICAL, "numeric": NUMERIC, "target": "activated", "C": C_final,
            "min_category_count": MIN_CATEGORY_COUNT, "split": "nested 5x5 repeated CV + time holdout (train created<2026-06-01, test June)"},
           open(OUT / "feature_schema.json", "w"), indent=2)
 json.dump(metrics, open(OUT / "propensity_metrics.json", "w"), indent=2)
 print(json.dumps(metrics, indent=2))
+for k, m_ in stage_metrics.items():
+    print(f"  stage {m_['stage']:15s} n={m_['n']:4d} base {m_['base_rate']:.1%}: AUC {m_['auc']:.3f} (all-leads {m_['auc_global']:.3f})  Brier {m_['brier']:.3f} (all-leads {m_['brier_global']:.3f})  ECE {m_['ece']:.3f} (all-leads {m_['ece_global']:.3f})")
 print(f"[{MODEL_VERSION}] nested CV AUC {cv['auc_mean']} (gap {cv['overfit_gap']}), June AUC {time_holdout['auc']} {time_holdout['auc_ci95']}, "
       f"vs v1 {paired['delta_auc_mean']:+} ({paired['share_folds_v2_better']:.0%} folds), ECE {time_holdout['ece_decile']}, C={C_final}, {time.time() - t0:.0f}s")

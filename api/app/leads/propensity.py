@@ -11,6 +11,9 @@ import pandas as pd
 from app.config import API_ROOT
 from app.leads.features import FEATURES, build_features
 
+# Back-office lead stage -> funnel stage the lead has already reached (index into the CSV funnel; A64). Same mapping as app/seed.py STAGE.
+STAGE_REACHED = {"advisor": 1, "quote": 2, "kyc": 3, "order": 4}  # 1 Contacted, 2 Needs assessed, 3 Quote accepted, 4 KYC complete
+
 MODEL_PATH = (API_ROOT / ".." / "data" / "derived" / "propensity.joblib").resolve()
 
 _NUM_LABEL = {"employee_count_log": "Team size", "num_sites": "Number of sites"}
@@ -30,7 +33,7 @@ def model_info() -> dict:
         return {"loaded": False}
     m = b.get("metrics", {})
     return {"loaded": True, "version": b.get("model_version", "propensity-v1"), "trained_at": b.get("trained_at"), "n_rows": b.get("n_rows"),
-            "features": b.get("features"), "cv_auc": m.get("nested_cv", {}).get("auc_mean"), "holdout_auc": m.get("time_holdout", {}).get("auc"),
+            "features": b.get("features"), "stages": sorted(b.get("stage_pipelines", {}) or []), "cv_auc": m.get("nested_cv", {}).get("auc_mean"), "holdout_auc": m.get("time_holdout", {}).get("auc"),
             "ece": m.get("time_holdout", {}).get("ece_decile")}
 
 
@@ -49,15 +52,21 @@ def _label(feat: str, value_name: str | None, sign: int) -> str:
     return f"{_CAT_LABEL.get(feat, '')} {value_name} {arrow}".replace("  ", " ").strip()
 
 
-def score(row: pd.DataFrame | dict, top_k: int = 3) -> tuple[float, list[str]]:
-    """row: one-row DataFrame/dict of RAW lead columns (as in smb_leads) -> (prob, reasons)."""
+def score(row: pd.DataFrame | dict, top_k: int = 3, stage: str | None = None) -> tuple[float, list[str]]:
+    """row: one-row DataFrame/dict of RAW lead columns (as in smb_leads) -> (P(activate), reasons).
+    stage=None: probability for a brand-new lead. stage in STAGE_REACHED: probability given the lead already reached that funnel stage
+    (stage-aware model, A64), so a lead at KYC is scored ~60%, not ~8%, and expected values compare across stages."""
     bundle = _load()
-    pipe = bundle["pipeline"]
     df = pd.DataFrame([row]) if isinstance(row, dict) else row.iloc[[0]]
     X = build_features(df)
-    raw = float(pipe.predict_proba(X)[0, 1])
-    pi = bundle["prior"]  # undo class_weight="balanced" prior shift so prob is calibrated
-    prob = float(1 / (1 + np.exp(-(np.log(raw / (1 - raw)) - np.log((1 - pi) / pi)))))
+    if stage in STAGE_REACHED and bundle.get("stage_pipelines"):
+        pipe = bundle["stage_pipelines"][str(STAGE_REACHED[stage])]  # trained without class weights: already calibrated
+        prob = float(pipe.predict_proba(X)[0, 1])
+    else:
+        pipe = bundle["pipeline"]
+        raw = float(pipe.predict_proba(X)[0, 1])
+        pi = bundle["prior"]  # undo class_weight="balanced" prior shift so prob is calibrated
+        prob = float(1 / (1 + np.exp(-(np.log(raw / (1 - raw)) - np.log((1 - pi) / pi)))))
     pre, clf = pipe.named_steps["pre"], pipe.named_steps["clf"]
     xt = pre.transform(X)
     xt = xt.toarray() if hasattr(xt, "toarray") else np.asarray(xt)

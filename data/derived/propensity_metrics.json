@@ -1,5 +1,5 @@
 {
-  "model_version": "propensity-v2",
+  "model_version": "propensity-v3",
   "features": [
     "segment",
     "city_tier_c",
@@ -34,6 +34,60 @@
     "share_folds_v2_better": 0.96
   },
   "hgb_cv_auc_mean": 0.7133,
+  "stage_models": {
+    "1": {
+      "stage": "Contacted",
+      "n": 3406,
+      "base_rate": 0.108,
+      "C": 0.1,
+      "auc": 0.7115,
+      "auc_global": 0.7105,
+      "brier": 0.0917,
+      "brier_global": 0.0929,
+      "brier_base": 0.0964,
+      "ece": 0.0169,
+      "ece_global": 0.0333
+    },
+    "2": {
+      "stage": "Needs assessed",
+      "n": 1974,
+      "base_rate": 0.1864,
+      "C": 0.3,
+      "auc": 0.7,
+      "auc_global": 0.6989,
+      "brier": 0.1409,
+      "brier_global": 0.1541,
+      "brier_base": 0.1517,
+      "ece": 0.029,
+      "ece_global": 0.1043
+    },
+    "3": {
+      "stage": "Quote accepted",
+      "n": 861,
+      "base_rate": 0.4274,
+      "C": 0.3,
+      "auc": 0.6821,
+      "auc_global": 0.6667,
+      "brier": 0.2201,
+      "brier_global": 0.3419,
+      "brier_base": 0.2447,
+      "ece": 0.0627,
+      "ece_global": 0.3313
+    },
+    "4": {
+      "stage": "KYC complete",
+      "n": 588,
+      "base_rate": 0.6259,
+      "C": 0.03,
+      "auc": 0.6211,
+      "auc_global": 0.5733,
+      "brier": 0.2271,
+      "brier_global": 0.4975,
+      "brier_base": 0.2342,
+      "ece": 0.0813,
+      "ece_global": 0.5157
+    }
+  },
   "time_holdout": {
     "n_train": 3296,
     "n_test": 1704,

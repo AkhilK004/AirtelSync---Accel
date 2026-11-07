@@ -48,6 +48,7 @@ No out-of-order stage dates; every activated lead has `kyc_complete_date`; `days
 - v2 beats v1 on 96% of paired folds (mean +0.031 AUC); on June the gain is +0.034 [+0.008, +0.060]. Shuffled-label AUC 0.49 (no leakage through the pipeline). Learning curve 0.696 / 0.709 / 0.715 / 0.720 at 1k / 2k / 3k / 4k rows: still rising slowly, so more leads will help a little; ~0.72 is close to what this noisy synthetic outcome allows.
 - Calibration (June quintiles, predicted / actual): 1.2%/0.9%, 3.1%/2.0%, 5.6%/8.8%, 8.8%/8.8%, 16.8%/16.7%. Brier 0.0664 vs 0.0690 for "always predict the base rate".
 - Strongest drivers (standardised coefficients): Referral source ↑, GSTIN ↑/↓, WhatsApp and website sources ↓, micro retail ↓, existing Accel customer ↑, tier-1 city ↑.
+- **Stage-aware scoring (v3, A64):** calibrated P(activate) given the stage a lead has reached (Contacted 10.8%, Needs assessed 18.6%, Quote accepted 42.7%, KYC complete 62.6% actual). ECE vs the all-leads model: 0.017 vs 0.033, 0.029 vs 0.104, 0.063 vs 0.331, 0.081 vs 0.516. Details in `docs/model_card.md`.
 - Use: rank whom to call first within a routing queue (back-office sorts by probability x segment bundle value), never as a forecast. Cancelled / Suspended GSTIN leads are held for compliance regardless of score.
 - Reasons are the 3 largest coefficient x value contributions, e.g. `['Source: Referral ↑', 'Has GSTIN ↑', 'Not with Accel today ↓']`.
 

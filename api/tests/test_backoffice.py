@@ -89,6 +89,17 @@ def test_routing_rules(seeded):
     assert leads.team_for_city("Pune") == "West" and leads.team_for_city("Chennai") == "South" and leads.team_for_city(None) == "Unassigned"
 
 
+def test_leads_are_scored_with_their_stage_model(seeded):
+    rows = L()
+    by = {}
+    for r in rows:
+        if not r["compliance_hold"]:
+            by.setdefault(r["stage"], []).append(r["score"])
+    mean = {k: sum(v) / len(v) for k, v in by.items()}
+    assert mean["order"] > mean["kyc"] > mean["advisor"]            # late-stage leads are worth calling first (A64)
+    assert max(by["order"]) > 0.3
+
+
 def test_compliance_hold_overrides_the_model():
     """A61: Cancelled/Suspended GSTIN -> compliance desk, expected value 0, whatever the score."""
     from app.data.loaders import get_data

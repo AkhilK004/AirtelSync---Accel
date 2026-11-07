@@ -60,4 +60,4 @@ def raw_row(ctx: dict) -> dict:
 def score_lead(lead: dict) -> tuple[float, list[str]]:
     import pandas as pd
     row = lead.get("raw_features") or raw_row(context(lead))  # seeded leads carry their real CSV row
-    return score(pd.DataFrame([row]))
+    return score(pd.DataFrame([row]), stage=lead.get("stage_reached"))

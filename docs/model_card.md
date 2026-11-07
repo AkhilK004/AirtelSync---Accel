@@ -1,4 +1,4 @@
-# Model card: lead propensity (`propensity-v2`)
+# Model card: lead propensity (`propensity-v3`)
 
 **Purpose.** Ranks leads the advisor could not close by how likely they are to activate, so telesales / partners / field force call the best leads first. It is a ranking aid, not a forecast, and it never decides price, eligibility or KYC.
 
@@ -35,6 +35,18 @@ One-hot (categories with < 20 rows pooled) + standardised numerics -> `LogisticR
 | Shuffled-label AUC (leak check) | 0.49 | 0.45-0.55 |
 | Learning curve 1k / 2k / 3k / 4k rows | 0.696 / 0.709 / 0.715 / 0.720 | non-decreasing (no under-fitting) |
 | vs previous v1 (paired folds) | +0.031 AUC, better on 96% of folds; June +0.034 [+0.008, +0.060] | better on ≥ 80% of folds |
+
+## Stage-aware scoring (v3)
+Back-office leads sit at a funnel stage, so there is one model per stage reached (Contacted, Needs assessed, Quote accepted, KYC complete; same 8 inputs, no class weights). Ranking inside a stage is unchanged; calibration is what improves, so expected values compare across stages (A64).
+
+| Lead has reached | Rows | Actual activation | AUC (stage / all-leads) | Brier (stage / all-leads) | ECE (stage / all-leads) |
+|---|---|---|---|---|---|
+| Contacted | 3,406 | 10.8% | 0.712 / 0.711 | 0.092 / 0.093 | 0.017 / 0.033 |
+| Needs assessed | 1,974 | 18.6% | 0.700 / 0.699 | 0.141 / 0.154 | 0.029 / 0.104 |
+| Quote accepted | 861 | 42.7% | 0.682 / 0.667 | 0.220 / 0.342 | 0.063 / 0.331 |
+| KYC complete | 588 | 62.6% | 0.621 / 0.573 | 0.227 / 0.497 | 0.081 / 0.516 |
+
+5x5 repeated CV; the all-leads model is trained on every lead outside the test fold, as in production.
 
 ## Known limits and how they are handled
 - **The model learned the old sales process.** Lead source is its strongest input (WhatsApp ↓, referral ↑), and the advisor is meant to fix exactly the WhatsApp leak. Scores are therefore compared **within** a routing queue, and the model must be retrained on advisor-era leads.

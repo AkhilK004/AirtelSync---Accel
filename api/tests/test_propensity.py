@@ -55,6 +55,26 @@ def test_gate_beats_previous_model(m):
     assert m["paired_vs_v1"]["delta_auc_mean"] > 0 and m["paired_vs_v1"]["share_folds_v2_better"] >= 0.8
 
 
+# ------------------------------------------------------------------ stage-aware gates (A64)
+def test_gate_stage_models_beat_all_leads_model(m):
+    sm = m["stage_models"]
+    assert set(sm) == {"1", "2", "3", "4"}
+    for k, s in sm.items():
+        assert s["auc"] >= s["auc_global"] - 0.01, k              # never worse at ranking within the stage
+        assert s["brier"] < s["brier_base"] + 1e-4, k             # beats "predict the stage base rate"
+        assert s["brier"] <= s["brier_global"], k                 # better calibrated than scoring everyone as a new lead
+        assert s["ece"] <= 0.10, k
+    assert sm["3"]["ece"] < 0.5 * sm["3"]["ece_global"] and sm["4"]["ece"] < 0.5 * sm["4"]["ece_global"]
+
+
+def test_stage_scores_are_comparable_across_stages():
+    row = L[(L.has_gstin) & (L.segment == "Professional offices")].iloc[[0]]
+    probs = [score(row, stage=s)[0] for s in ("advisor", "quote", "kyc", "order")]
+    assert probs == sorted(probs) and probs[-1] > 0.4 > probs[0]   # later stage -> higher P(activate); KYC-complete ~60%, not ~8%
+    assert score(row, stage=None)[0] < probs[1]                      # new-lead score stays low
+    assert score(row, stage="nonsense")[0] == score(row, stage=None)[0]
+
+
 # ------------------------------------------------------------------ train/serve parity
 def test_serving_row_provides_every_model_input():
     ctx = dict(business_type="Pharmacy", employees=6, locations=1, city_tier=1, language="hi", tools=["Accel mobile"], wants=[],
@@ -88,4 +108,4 @@ def test_accel_customer_scores_higher():
 
 def test_model_info_for_health():
     info = model_info()
-    assert info["loaded"] and info["version"] == "propensity-v2" and info["features"] == features.FEATURES and info["cv_auc"] >= 0.70
+    assert info["loaded"] and info["version"] == "propensity-v3" and info["stages"] == ["1", "2", "3", "4"] and info["features"] == features.FEATURES and info["cv_auc"] >= 0.70
