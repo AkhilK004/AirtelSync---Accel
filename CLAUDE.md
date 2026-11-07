@@ -1,0 +1,1 @@
+Read PLAN.md before every task. Follow §2 Working rules strictly. Work phase by phase.

@@ -1,0 +1,9 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+.next/
+YTL_TrackA_Udyam_Digital_Data/
+.pytest_cache/
+data/derived/*.joblib
