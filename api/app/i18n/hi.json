@@ -1,0 +1,54 @@
+{
+  "doc": {"gst_certificate": "GST सर्टिफ़िकेट", "udyam_certificate": "उद्यम सर्टिफ़िकेट", "signatory_id": "अधिकृत हस्ताक्षरकर्ता की ID", "address_proof": "पते का प्रमाण (बिजली बिल)"},
+  "code": {
+    "IMG_QUALITY": "फ़ोटो साफ़ है", "DOC_TYPE": "सही दस्तावेज़", "GSTIN_FORMAT": "GSTIN का फ़ॉर्मेट", "GSTIN_CHECKSUM": "GSTIN का चेक डिजिट",
+    "GSTIN_REGISTRY": "GSTIN रजिस्ट्री में मिला", "GSTIN_STATUS": "GSTIN चालू है", "GSTIN_STATE": "GSTIN का राज्य मेल खाता है", "GSTIN_DECLARED": "GSTIN वही है जो आपने डाला",
+    "CERT_VS_REGISTRY": "सर्टिफ़िकेट रजिस्ट्री से मेल खाता है", "UDYAM_FORMAT": "उद्यम नंबर", "UDYAM_REGISTRY": "उद्यम रजिस्ट्री में मिला", "NAME_MATCH": "बिज़नेस के नाम मेल खाते हैं",
+    "SIGNATORY_MATCH": "हस्ताक्षरकर्ता मालिक से मेल खाता है", "ID_FORMAT": "ID नंबर", "ID_EXPIRY": "ID वैध है", "BILL_RECENCY": "बिल हाल का है", "DATE_LOGIC": "तारीखें सही हैं",
+    "ADDRESS_MATCH": "पता मेल खाता है", "DOC_MISSING": "सभी दस्तावेज़ अपलोड हुए"
+  },
+  "msg": {
+    "check_ok": "ठीक है।",
+    "img_blurry": "आपके {doc} की फ़ोटो पढ़ने के लिए बहुत धुंधली है।",
+    "img_small": "इमेज बहुत छोटी है। बड़ी फ़ोटो लें (छोटी साइड कम से कम {min_side} पिक्सल)।",
+    "img_unreadable": "हम आपके {doc} का लिखा हुआ पढ़ नहीं पाए।",
+    "doc_wrong": "यह सही दस्तावेज़ नहीं लगता। हमें आपका {expected} चाहिए।",
+    "gstin_format_bad": "GSTIN {gstin} सही फ़ॉर्मेट में नहीं है।",
+    "gstin_checksum_bad": "GSTIN {gstin} में टाइपिंग की गलती है (चेक डिजिट नहीं बैठता)।",
+    "gstin_not_found": "GSTIN {gstin} GST रजिस्ट्री में नहीं है।",
+    "gstin_inactive": "रजिस्ट्री में यह GSTIN {status} है, इसलिए हम यह ऑर्डर आगे नहीं बढ़ा सकते।",
+    "gstin_state_mismatch": "GSTIN का राज्य कोड ({code}) पंजीकृत राज्य ({state}) से मेल नहीं खाता।",
+    "gstin_declared_mismatch": "आपका डाला हुआ GSTIN ({declared}) सर्टिफ़िकेट वाले GSTIN ({printed}) से अलग है।",
+    "cert_mismatch": "आपका अपलोड किया सर्टिफ़िकेट GST रजिस्ट्री से अलग है ({fields})। हमारी टीम इसकी समीक्षा करेगी।",
+    "udyam_missing": "इस सर्टिफ़िकेट पर उद्यम पंजीकरण नंबर छपा नहीं है।",
+    "udyam_bad": "उद्यम नंबर {number} सही फ़ॉर्मेट में नहीं है।",
+    "udyam_not_found": "उद्यम नंबर {number} रजिस्ट्री में नहीं है।",
+    "name_mismatch": "बिज़नेस के नाम ठीक से मेल नहीं खाते: \"{a}\" और \"{b}\"।",
+    "signatory_mismatch": "ID पर नाम ({id_name}) पंजीकृत मालिक ({owner}) से अलग है।",
+    "signatory_unverifiable": "रजिस्ट्री में इस संस्था के किसी व्यक्ति का नाम नहीं है; ID आपके बिज़नेस के लिए जारी है।",
+    "id_format_bad": "ID नंबर की जाँच नहीं हो पाई।",
+    "id_format_unchecked": "इस तरह की ID अपने आप जाँची नहीं जा सकती।",
+    "pan_entity_odd": "PAN का फ़ॉर्मेट सही है पर एंटिटी कोड असामान्य है।",
+    "id_expired": "यह ID {date} को खत्म हो चुकी है।",
+    "bill_old": "यह बिल {date} का है, जो {days} दिन से पुराना है।",
+    "date_future": "{field} ({date}) आगे की तारीख है।",
+    "date_unreadable": "हम {field} पढ़ नहीं पाए।",
+    "address_mismatch": "बिल का पता पंजीकृत पते से अलग है।",
+    "doc_missing": "{doc} अपलोड नहीं हुआ है।"
+  },
+  "fix": {
+    "reupload_clear": "ज़्यादा साफ़ फ़ोटो अपलोड करें: अच्छी रोशनी, सीधा, पूरा पन्ना फ़्रेम में।",
+    "reupload_right_doc": "अपना {expected} अपलोड करें।",
+    "correct_number": "नंबर को अपने सर्टिफ़िकेट से मिलाकर फिर से डालें।",
+    "enter_udyam_number": "सर्टिफ़िकेट से उद्यम नंबर डालें, या ऐसा सर्टिफ़िकेट अपलोड करें जिस पर वह दिखता हो।",
+    "newer_bill": "{min_date} के बाद की तारीख वाला बिल अपलोड करें।",
+    "valid_id": "ऐसी ID अपलोड करें जो अभी वैध हो।",
+    "upload_doc": "अपना {doc} अपलोड करें।"
+  },
+  "decision": {
+    "APPROVED": "मंज़ूर। आपका ऑर्डर इंस्टॉलेशन की ओर बढ़ रहा है।",
+    "ACTION_REQUIRED": "कार्रवाई ज़रूरी: नीचे की बातें ठीक करके फिर से भेजें।",
+    "MANUAL_REVIEW": "समीक्षा में है। हमारा कोई व्यक्ति {hours} घंटे में आपके दस्तावेज़ जाँचेगा।",
+    "REJECTED": "हम यह आवेदन मंज़ूर नहीं कर सके।"
+  }
+}

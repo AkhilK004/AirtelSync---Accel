@@ -6,6 +6,7 @@ import json
 from pydantic import BaseModel
 
 from app.config import settings
+from app.llm.base import ImagePart
 
 TIMEOUT_MS = 15_000
 
@@ -34,7 +35,8 @@ class GeminiClient:
     def extract(self, system: str, user_parts: list, schema: type[BaseModel]) -> BaseModel:
         t = self._types
         cfg = t.GenerateContentConfig(system_instruction=system, temperature=0, response_mime_type="application/json", response_schema=schema)
-        resp = self._call(user_parts, cfg)
+        parts = [t.Part.from_bytes(data=p.data, mime_type=p.mime) if isinstance(p, ImagePart) else p for p in user_parts]
+        resp = self._call(parts, cfg)
         if resp.parsed is not None:
             return resp.parsed
         return schema.model_validate_json(resp.text)

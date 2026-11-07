@@ -7,3 +7,4 @@ node_modules/
 YTL_TrackA_Udyam_Digital_Data/
 .pytest_cache/
 data/derived/*.joblib
+.review_store/

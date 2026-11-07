@@ -1,0 +1,54 @@
+{
+  "doc": {"gst_certificate": "GST certificate", "udyam_certificate": "Udyam certificate", "signatory_id": "signatory ID", "address_proof": "address proof (utility bill)"},
+  "code": {
+    "IMG_QUALITY": "Photo is clear", "DOC_TYPE": "Right document", "GSTIN_FORMAT": "GSTIN format", "GSTIN_CHECKSUM": "GSTIN check digit",
+    "GSTIN_REGISTRY": "GSTIN found in registry", "GSTIN_STATUS": "GSTIN is active", "GSTIN_STATE": "GSTIN state matches", "GSTIN_DECLARED": "GSTIN matches what you entered",
+    "CERT_VS_REGISTRY": "Certificate matches registry", "UDYAM_FORMAT": "Udyam number", "UDYAM_REGISTRY": "Udyam found in registry", "NAME_MATCH": "Business names match",
+    "SIGNATORY_MATCH": "Signatory matches owner", "ID_FORMAT": "ID number", "ID_EXPIRY": "ID is valid", "BILL_RECENCY": "Bill is recent", "DATE_LOGIC": "Dates make sense",
+    "ADDRESS_MATCH": "Address matches", "DOC_MISSING": "All documents uploaded"
+  },
+  "msg": {
+    "check_ok": "Looks good.",
+    "img_blurry": "The photo of your {doc} is too blurry to read.",
+    "img_small": "The image is too small. Use a larger photo (at least {min_side} pixels on the short side).",
+    "img_unreadable": "We could not read the text on your {doc}.",
+    "doc_wrong": "This does not look like the right document. We need your {expected}.",
+    "gstin_format_bad": "The GSTIN {gstin} is not in the right format.",
+    "gstin_checksum_bad": "The GSTIN {gstin} has a typing error (its check digit does not add up).",
+    "gstin_not_found": "GSTIN {gstin} is not in the GST registry.",
+    "gstin_inactive": "This GSTIN is {status} in the registry, so we cannot continue this order.",
+    "gstin_state_mismatch": "The GSTIN state code ({code}) does not match the registered state ({state}).",
+    "gstin_declared_mismatch": "The GSTIN you entered ({declared}) is different from the one on the certificate ({printed}).",
+    "cert_mismatch": "The certificate you uploaded differs from the GST registry ({fields}). Our team will review it.",
+    "udyam_missing": "No Udyam registration number is printed on this certificate.",
+    "udyam_bad": "The Udyam number {number} is not in the right format.",
+    "udyam_not_found": "Udyam number {number} is not in the registry.",
+    "name_mismatch": "Business names do not match closely enough: \"{a}\" and \"{b}\".",
+    "signatory_mismatch": "The name on the ID ({id_name}) is not the registered owner ({owner}).",
+    "signatory_unverifiable": "The registry lists no individual owners for this entity; the ID is issued for your business.",
+    "id_format_bad": "The ID number could not be verified.",
+    "id_format_unchecked": "This ID type cannot be checked automatically.",
+    "pan_entity_odd": "The PAN format is valid but the entity code is unusual.",
+    "id_expired": "This ID expired on {date}.",
+    "bill_old": "This bill is dated {date}, which is older than {days} days.",
+    "date_future": "The {field} ({date}) is in the future.",
+    "date_unreadable": "We could not read the {field}.",
+    "address_mismatch": "The address on the bill is different from the registered address.",
+    "doc_missing": "The {doc} has not been uploaded."
+  },
+  "fix": {
+    "reupload_clear": "Upload a sharper photo: good light, flat, whole page in frame.",
+    "reupload_right_doc": "Upload your {expected}.",
+    "correct_number": "Check the number against your certificate and enter it again.",
+    "enter_udyam_number": "Enter the Udyam number from your certificate, or upload a certificate that shows it.",
+    "newer_bill": "Upload a bill dated after {min_date}.",
+    "valid_id": "Upload an ID that is still valid.",
+    "upload_doc": "Upload your {doc}."
+  },
+  "decision": {
+    "APPROVED": "Approved. Your order moves to installation.",
+    "ACTION_REQUIRED": "Action required: fix the items below and submit again.",
+    "MANUAL_REVIEW": "Under review. A person will check your documents within {hours} hours.",
+    "REJECTED": "We could not approve this application."
+  }
+}

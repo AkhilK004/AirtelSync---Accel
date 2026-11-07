@@ -1,0 +1,13 @@
+applicant_id,expected_decision,expected_issue_codes,note
+K01,REJECTED,GSTIN_STATUS|UDYAM_FORMAT,"DRAFT - human must verify. GSTIN is Cancelled in the registry; Udyam certificate has no registration number printed."
+K02,APPROVED,,"DRAFT - human must verify. GST certificate is scanned at a slight angle but fully readable; everything else consistent."
+K03,APPROVED,,"DRAFT - human must verify. Clean."
+K04,ACTION_REQUIRED,IMG_QUALITY,"DRAFT - human must verify. GST certificate image is heavily blurred; re-upload."
+K05,APPROVED,,"DRAFT - human must verify. No Udyam certificate supplied; GSTIN path does not require one."
+K06,ACTION_REQUIRED,GSTIN_CHECKSUM,"DRAFT - human must verify. Printed GSTIN 08YKZXS8189L1ZO fails the checksum (registry holds 08YKZXS5189L1ZO)."
+K07,MANUAL_REVIEW,CERT_VS_REGISTRY|NAME_MATCH,"DRAFT - human must verify. Certificate legal name says Shri Physio Clinic; registry says Neelgiri Physio Clinic."
+K08,APPROVED,,"DRAFT - human must verify. Clean (GSTIN contains the letter O, valid)."
+K09,APPROVED,,"DRAFT - human must verify. Clean."
+K10,APPROVED,,"DRAFT - human must verify. LLP: registry has no individual names, signatory cannot be matched, ID is issued for the business."
+K11,ACTION_REQUIRED,BILL_RECENCY,"DRAFT - human must verify. Electricity bill dated 2025-10-31, more than 90 days before 2026-07-15."
+K12,APPROVED,,"DRAFT - human must verify. Clean."
