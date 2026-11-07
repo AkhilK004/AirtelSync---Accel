@@ -1,0 +1,37 @@
+{
+  "n_train": 3296,
+  "n_test": 1704,
+  "base_rate_test": 0.07453051643192488,
+  "lr": {
+    "auc": 0.6951,
+    "top_decile_lift": 2.21,
+    "top_decile_rate": 0.1647
+  },
+  "lr_calibration_quintiles": [
+    {
+      "pred_mean": 0.01,
+      "actual": 0.009
+    },
+    {
+      "pred_mean": 0.027,
+      "actual": 0.059
+    },
+    {
+      "pred_mean": 0.052,
+      "actual": 0.076
+    },
+    {
+      "pred_mean": 0.089,
+      "actual": 0.076
+    },
+    {
+      "pred_mean": 0.179,
+      "actual": 0.152
+    }
+  ],
+  "hgb": {
+    "auc": 0.6767,
+    "top_decile_lift": 1.89,
+    "top_decile_rate": 0.1412
+  }
+}

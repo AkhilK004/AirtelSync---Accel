@@ -1,0 +1,21 @@
+{
+  "categorical": [
+    "segment",
+    "business_type",
+    "city_tier_c",
+    "lead_source",
+    "preferred_language",
+    "current_internet",
+    "annual_turnover_band",
+    "has_gstin_c",
+    "has_udyam_c"
+  ],
+  "numeric": [
+    "employee_count_log",
+    "num_sites",
+    "telecom_spend_log",
+    "n_interest"
+  ],
+  "target": "activated",
+  "split": "train created<2026-06-01, test June"
+}
