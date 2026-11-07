@@ -17,7 +17,6 @@ import {
 import { useApiError } from "@/lib/use-api-error";
 
 type Step = "loading" | "consent" | "registration" | "documents" | "result";
-const OPTIONAL_SLOTS = ["udyam_certificate"]; // shown on the GSTIN path but not required
 
 function Icon({ s }: { s: CheckView["status"] }) {
   if (s === "PASS") return <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-green-600" aria-label="ok" />;
@@ -139,7 +138,7 @@ export function KycFlow({ orderId }: { orderId: string }) {
 
   const stepNo = { consent: 1, registration: 2, documents: 3, result: 4, loading: 1 }[step];
   const required = view?.required ?? [];
-  const slots = [...required, ...(view?.path === "gstin" ? OPTIONAL_SLOTS : [])];
+  const slots = required;
   const allDone = required.every((s) => view?.uploaded.includes(s));
   const requiredOk = notice.purposes.filter((p) => p.required).every((p) => ticks[p.id]);
 

@@ -142,7 +142,7 @@ def doc_checks(slot: str, ex: dict, quality: Quality | None) -> list[CheckResult
 
 # --------------------------------------------------------------------------- cross-document checks
 def required_slots(path: str) -> list[str]:
-    return {"gstin": ["gst_certificate", "signatory_id", "address_proof"], "udyam": ["udyam_certificate", "signatory_id", "address_proof"],
+    return {"gstin": ["gst_certificate", "udyam_certificate", "signatory_id", "address_proof"], "udyam": ["udyam_certificate", "signatory_id", "address_proof"],
             "pan": ["signatory_id", "address_proof"]}[path]
 
 

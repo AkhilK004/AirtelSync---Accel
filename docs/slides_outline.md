@@ -47,7 +47,7 @@ Screens: advisor chat → quote with toggles → checkout → consent + KYC → 
 ### 6. Smart KYC and compliance
 - Lookup-first prefill, quality gate, GSTIN checksum, registry status, certificate-vs-registry, name / address / signatory / bill-recency checks, deterministic decision (approved / action required / manual review / rejected), fix instruction in the owner's language.
 - Consent screen: 3 languages, granular, marketing off, append-only ledger.
-- Evidence: **12 specimen applicants, 12/12 decisions match** the draft answer key (offline run; includes cancelled GSTIN, blur, checksum error, tampered certificate, stale bill). *Say plainly in the pitch that the extraction behind this run is a transcription fixture and the answer key is a draft until verified.*
+- Evidence: **12 specimen applicants, 12/12 decisions match** the draft answer key (includes cancelled GSTIN, blur, checksum error, tampered certificate, stale bill, missing Udyam certificate; offline fixture run and live Gemini vision run both 12/12). *Say plainly in the pitch that the extraction behind this run is a transcription fixture and the answer key is a draft until verified.*
 
 ### 7. Channel model (Q4)
 - **Field force:** multi-site, manufacturers, assisted leads (site survey).
