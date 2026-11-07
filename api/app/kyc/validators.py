@@ -72,6 +72,8 @@ def doc_checks(slot: str, ex: dict, quality: Quality | None) -> list[CheckResult
     if quality is not None and not quality.ok:
         key = {"blurry": "img_blurry", "small": "img_small", "undecodable": "img_unreadable"}[quality.reason or "undecodable"]
         return [ck("IMG_QUALITY", "FAIL", key, {"min_side": 600}, "reupload_clear", slot)]
+    if ex.get("doc_type_detected") == "__service_error__":
+        return [ck("IMG_QUALITY", "FAIL", "service_busy", {}, "try_again", slot)]
     if float(ex.get("confidence") or 0) < LOW_CONFIDENCE:
         return [ck("IMG_QUALITY", "FAIL", "img_unreadable", {}, "reupload_clear", slot)]
     out.append(ck("IMG_QUALITY", "PASS", "check_ok", {}, None, slot))

@@ -142,3 +142,65 @@ def test_repo_switch_by_env(monkeypatch):
     repo.get_repo.cache_clear()
     monkeypatch.setattr(settings, "STORAGE", "memory")
     repo.get_repo.cache_clear()
+
+
+# ---------------------------------------------------------------- found on the live deploy
+def test_redaction_filter_keeps_uvicorn_access_log_formatting():
+    import logging
+    from uvicorn.logging import AccessFormatter
+    from app.logging import RedactionFilter
+    rec = logging.LogRecord("uvicorn.access", logging.INFO, "f", 1, '%s - "%s %s HTTP/%s" %d', ("1.2.3.4:5", "GET", "/orders/x?phone=9876543210", "1.1", 200), None)
+    assert RedactionFilter().filter(rec)
+    out = AccessFormatter('%(client_addr)s - "%(request_line)s" %(status_code)s').format(rec)
+    assert "9876543210" not in out and "GET" in out and "200" in out
+
+
+def test_gemini_retries_transient_errors_with_backoff(monkeypatch):
+    from app.llm import gemini
+    sleeps = []
+    monkeypatch.setattr(gemini.time, "sleep", lambda s: sleeps.append(s))
+
+    class Boom(Exception):
+        def __init__(self, code):
+            self.code = code
+
+    calls = {"n": 0}
+
+    class Models:
+        def generate_content(self, **kw):
+            calls["n"] += 1
+            if calls["n"] < 3:
+                raise Boom(429)
+            return "ok"
+
+    g = gemini.GeminiClient.__new__(gemini.GeminiClient)
+    g.client = type("C", (), {"models": Models()})()
+    assert g._call(["x"], None) == "ok" and calls["n"] == 3 and sleeps == [1, 3]
+    calls["n"] = 0
+
+    class Bad(Models):
+        def generate_content(self, **kw):
+            calls["n"] += 1
+            raise Boom(400)
+
+    g.client = type("C", (), {"models": Bad()})()
+    try:
+        g._call(["x"], None)
+        assert False
+    except Boom:
+        assert calls["n"] == 1  # a 400 is not retried
+
+
+def test_llm_failure_during_extraction_says_try_again_not_sharper_photo(monkeypatch):
+    from app.kyc import extract, validators
+    from app.llm import get_llm
+    from app.i18n import render_check
+
+    def boom(*a, **k):
+        raise TimeoutError()
+
+    monkeypatch.setattr(get_llm(), "extract", boom)
+    ex = extract.extract_document("signatory_id", b"x", "image/png").model_dump()
+    cs = validators.doc_checks("signatory_id", ex, None)
+    assert cs[0].message_key == "service_busy" and cs[0].fix_key == "try_again"
+    assert "busy" in render_check(cs[0], "en")["message"]

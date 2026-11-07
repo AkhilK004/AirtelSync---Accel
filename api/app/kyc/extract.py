@@ -11,6 +11,7 @@ from app.llm.base import ImagePart
 from app.models.kyc import SLOT_SCHEMAS, BillExtract, GstCertExtract, IdExtract, UdyamCertExtract
 
 log = logging.getLogger("kyc")
+SERVICE_ERROR = "__service_error__"
 
 SYSTEM = (
     "You read one Indian business document image and return ONLY the schema. Extract exactly what is printed. "
@@ -34,7 +35,7 @@ def extract_document(slot: str, data: bytes, mime: str) -> BaseModel:
         ex = get_llm().extract(SYSTEM + " " + SLOT_HINT[slot], [ImagePart(data, mime), "Extract the fields."], schema)
     except Exception as e:  # noqa: BLE001 - an LLM failure must degrade to "please re-upload", never crash
         log.warning("extract_failed slot=%s err=%s", slot, type(e).__name__)
-        return schema.model_validate({"confidence": 0.0})
+        return schema.model_validate({"doc_type_detected": SERVICE_ERROR, "confidence": 0.0})  # not the owner's fault: "try again", not "sharper photo"
     ex = _normalise(ex)
     if isinstance(ex, IdExtract) and ex.id_kind == "aadhaar":
         raw = ex.id_number

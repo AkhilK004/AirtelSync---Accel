@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import time
 
 from pydantic import BaseModel
 
@@ -24,12 +25,17 @@ class GeminiClient:
                                        http_options=types.HttpOptions(timeout=TIMEOUT_MS))
 
     def _call(self, contents, config):
+        """Up to 3 attempts. Transient errors (429 rate limit, 5xx) wait 1 s then 3 s; anything else fails fast."""
         last = None
-        for _ in range(2):  # one retry
+        for attempt in range(3):
             try:
                 return self.client.models.generate_content(model=settings.GEMINI_MODEL, contents=contents, config=config)
             except Exception as e:  # noqa: BLE001
                 last = e
+                code = getattr(e, "code", None) or getattr(e, "status_code", None)
+                if attempt == 2 or (code is not None and code not in (408, 429, 500, 502, 503, 504)):
+                    break
+                time.sleep(1 if attempt == 0 else 3)
         raise last
 
     def extract(self, system: str, user_parts: list, schema: type[BaseModel]) -> BaseModel:

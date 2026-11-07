@@ -6,6 +6,7 @@
 #
 # Needs: gcloud authenticated, billing enabled on PROJECT. Costs real money (Cloud Run min-instance, Firestore, Vertex AI).
 set -euo pipefail
+export CLOUDSDK_CORE_DISABLE_PROMPTS=1   # non-interactive: accept the Artifact Registry repo creation prompt
 : "${PROJECT:?set PROJECT=<gcp project id>}"
 REGION="${REGION:-asia-south1}"
 API_SVC="${API_SVC:-udyam-api}"
@@ -26,11 +27,11 @@ run gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifact
 run gcloud firestore databases create --location="$REGION" --type=firestore-native || true
 
 # Review-image bucket: 1-day lifecycle delete (the real retention enforcement)
-cat > /tmp/lifecycle.json <<'JSON'
+cat > .deploy-lifecycle.tmp.json <<'JSON'
 {"rule": [{"action": {"type": "Delete"}, "condition": {"age": 1}}]}
 JSON
 run gcloud storage buckets create "gs://${BUCKET}" --location="$REGION" --uniform-bucket-level-access || true
-run gcloud storage buckets update "gs://${BUCKET}" --lifecycle-file=/tmp/lifecycle.json
+run gcloud storage buckets update "gs://${BUCKET}" --lifecycle-file=.deploy-lifecycle.tmp.json
 
 # Least-privilege service account
 run gcloud iam service-accounts create udyam-api --display-name="Udyam API" || true
@@ -52,13 +53,13 @@ fi
 
 # Web (alternative: Vercel with NEXT_PUBLIC_API_URL=$API_URL). NEXT_PUBLIC_* are baked at build time.
 IMG="${REGION}-docker.pkg.dev/${PROJECT}/cloud-run-source-deploy/${WEB_SVC}:${SHA}"
-cat > /tmp/cloudbuild-web.yaml <<YAML
+cat > .deploy-cloudbuild-web.tmp.yaml <<YAML
 steps:
 - name: gcr.io/cloud-builders/docker
   args: ["build","-t","${IMG}","--build-arg","NEXT_PUBLIC_API_URL=${API_URL}","--build-arg","NEXT_PUBLIC_DEMO_ADMIN_TOKEN=${DEMO_TOKEN:-}","."]
 images: ["${IMG}"]
 YAML
-run gcloud builds submit web --config /tmp/cloudbuild-web.yaml
+run gcloud builds submit web --config .deploy-cloudbuild-web.tmp.yaml
 run gcloud run deploy "$WEB_SVC" --image "$IMG" --region "$REGION" --allow-unauthenticated --max-instances 3
 
 echo "Next: set a GCP budget alert (human step); rerun with WEB_ORIGIN=<web url> so CORS allows it; then run scripts/run_scenarios.py --base-url \$API_URL"

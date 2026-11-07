@@ -53,7 +53,8 @@
     "date_future": "The {field} ({date}) is in the future.",
     "date_unreadable": "We could not read the {field}.",
     "address_mismatch": "The address on the bill is different from the registered address.",
-    "doc_missing": "The {doc} has not been uploaded."
+    "doc_missing": "The {doc} has not been uploaded.",
+    "service_busy": "Our document reader is busy right now, so this {doc} was not read."
   },
   "fix": {
     "reupload_clear": "Upload a sharper photo: good light, flat, whole page in frame.",
@@ -62,7 +63,8 @@
     "enter_udyam_number": "Enter the Udyam number from your certificate, or upload a certificate that shows it.",
     "newer_bill": "Upload a bill dated after {min_date}.",
     "valid_id": "Upload an ID that is still valid.",
-    "upload_doc": "Upload your {doc}."
+    "upload_doc": "Upload your {doc}.",
+    "try_again": "Please upload it again in a moment."
   },
   "decision": {
     "APPROVED": "Approved. Your order moves to installation.",

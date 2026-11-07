@@ -20,9 +20,15 @@ def redact(text: str) -> str:
 
 
 class RedactionFilter(logging.Filter):
+    """Redacts the message and every string argument but KEEPS the args tuple: uvicorn's access formatter unpacks 5 positional args."""
+
     def filter(self, record: logging.LogRecord) -> bool:
-        record.msg = redact(record.getMessage())
-        record.args = ()
+        if isinstance(record.msg, str):
+            record.msg = redact(record.msg)
+        if isinstance(record.args, tuple):
+            record.args = tuple(redact(a) if isinstance(a, str) else a for a in record.args)
+        elif isinstance(record.args, dict):
+            record.args = {k: redact(v) if isinstance(v, str) else v for k, v in record.args.items()}
         return True
 
 
