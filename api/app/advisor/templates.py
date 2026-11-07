@@ -83,6 +83,8 @@ NOTE = {
     "assisted": {"en": "This is an indicative price. An expert will call you within {hours} hours to survey your site.",
                  "hi": "यह अनुमानित कीमत है। हमारा विशेषज्ञ {hours} घंटे के भीतर साइट सर्वे के लिए आपको कॉल करेगा।",
                  "mr": "ही अंदाजे किंमत आहे. आमचे तज्ञ {hours} तासांत साइट सर्वेसाठी तुम्हाला कॉल करतील."},
+    "dep_added": {"en": "Also added {name} because {because} needs it.", "hi": "{name} भी जोड़ा गया क्योंकि {because} को इसकी ज़रूरत है।", "mr": "{name} देखील जोडले कारण {because} ला त्याची गरज आहे."},
+    "dep_removed": {"en": "Removed {name} because it needs {because}.", "hi": "{name} हटाया गया क्योंकि उसे {because} चाहिए।", "mr": "{name} काढले कारण त्याला {because} हवे."},
     "gst_extra": {"en": "Prices exclude GST; {rate}% GST is added in the total.", "hi": "कीमतों में GST शामिल नहीं है; कुल में {rate}% GST जोड़ा गया है।", "mr": "किमतीत GST समाविष्ट नाही; एकूणमध्ये {rate}% GST जोडला आहे."},
 }
 

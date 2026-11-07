@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.data.loaders import get_data
 from app import errors
-from app.routers import advisor, health, mocks, quotes
+from app.routers import advisor, checkout, health, mocks, quotes
 
 
 @asynccontextmanager
@@ -26,3 +26,4 @@ app.include_router(health.router)
 app.include_router(mocks.router)
 app.include_router(quotes.router)
 app.include_router(advisor.router)
+app.include_router(checkout.router)

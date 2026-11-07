@@ -81,6 +81,7 @@ class QuoteLine(BaseModel):
     setup_paise: int
     setup_display: str
     contract_months: int
+    reason: str = ""  # one plain-language line, in the requested language
 
 
 class AddonOption(BaseModel):
@@ -94,12 +95,14 @@ class AddonOption(BaseModel):
     setup_display: str
     can_toggle: bool
     blocked_reason: str | None = None
+    reason: str = ""
 
 
 class Quote(BaseModel):
     id: str
     segment: Segment
     bundle_name: dict[str, str]
+    bundle_title: str = ""
     lines: list[QuoteLine]
     addons: list[AddonOption]
     monthly_subtotal_paise: int

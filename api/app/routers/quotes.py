@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
 from app.engine.pricing import build_quote, make_quote, toggled_quote
@@ -22,19 +22,19 @@ def _load(quote_id: str) -> QuoteState:
 
 
 @router.post("", response_model=Quote)
-def create_quote(profile: Profile):
+def create_quote(profile: Profile, lang: str = Query("en", pattern="^(en|hi|mr)$")):
     state, quote = make_quote(profile)
     get_repo().put("quotes", state.id, state.model_dump(mode="json"))
-    return quote
+    return build_quote(state, lang)
 
 
 @router.get("/{quote_id}", response_model=Quote)
-def get_quote(quote_id: str):
-    return build_quote(_load(quote_id))
+def get_quote(quote_id: str, lang: str = Query("en", pattern="^(en|hi|mr)$")):
+    return build_quote(_load(quote_id), lang)
 
 
 @router.post("/{quote_id}/toggle", response_model=ToggleResult)
-def toggle_addon(quote_id: str, body: ToggleBody):
-    state, result = toggled_quote(_load(quote_id), body.sku, body.on)
+def toggle_addon(quote_id: str, body: ToggleBody, lang: str = Query("en", pattern="^(en|hi|mr)$")):
+    state, result = toggled_quote(_load(quote_id), body.sku, body.on, lang)
     get_repo().put("quotes", state.id, state.model_dump(mode="json"))
     return result

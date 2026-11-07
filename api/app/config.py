@@ -51,3 +51,9 @@ ASSISTED_CALLBACK_HOURS = 4
 MANUFACTURING_KEYWORDS = ("manufactur", "factory", "workshop", "plant", "unit")
 PROFESSIONAL_KEYWORDS = ("clinic", "doctor", "lab", "office", "firm", "studio", "agency", "centre", "center", "consult", "academy")
 MAX_MESSAGES_PER_SESSION = 80
+
+# --- checkout (mock) ---
+MOCK_OTP = "123456"
+SLOT_WINDOWS = ("morning", "evening")
+MAX_SLOT_DAYS_AHEAD = 30
+PAYMENT_MODES = ("pay_on_activation", "upi_mock")
