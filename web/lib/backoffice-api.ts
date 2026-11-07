@@ -3,7 +3,7 @@ import { API_URL } from "@/lib/api";
 
 export type Lead = {
   id: string; name: string; segment: string | null; stage: string; reason: string; route: string; partner_code: string | null; territory_team: string;
-  city: string | null; score: number | null; score_reasons: string[]; age_hours: number; status: string; order_id: string | null; quote_id: string | null;
+  city: string | null; score: number | null; score_reasons: string[]; expected_value_paise: number; expected_value_display: string; compliance_hold: string | null; age_hours: number; status: string; order_id: string | null; quote_id: string | null;
 };
 export type LeadDetail = Lead & {
   profile: Record<string, unknown>; phone_masked: string | null; preferred_time: string | null;

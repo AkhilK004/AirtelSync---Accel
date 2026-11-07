@@ -14,6 +14,7 @@ from app.analytics import events as ev
 from app.data.loaders import get_data
 from app.engine.pricing import make_quote, new_id
 from app.leads import service as leads
+from app.leads.features import RAW_INPUTS
 from app.models.engine import Profile
 from app.orders import service as orders
 from app.orders import state as S
@@ -31,8 +32,7 @@ REASON = {
     "Installation delayed beyond 21 days": "abandoned", "Customer cancelled before install": "abandoned", "First payment failed": "abandoned",
     "Locked in with current provider": "abandoned", "Only wanted a mobile plan": "abandoned", "Decided to wait": "abandoned",
 }
-RAW_COLS = ["segment", "business_type", "city_tier", "lead_source", "preferred_language", "current_internet", "annual_turnover_band", "has_gstin",
-            "has_udyam", "employee_count", "num_sites", "monthly_telecom_spend_inr", "products_of_interest"]
+RAW_COLS = RAW_INPUTS + ["business_type", "preferred_language"]  # model inputs + display-only fields for the drawer
 STATUS_PLAN = ["contacted"] * 5 + ["won"] * 3 + ["lost"] * 2
 
 

@@ -48,3 +48,4 @@ def test_health():
     with TestClient(app) as c:
         r = c.get("/health")
     assert r.status_code == 200 and r.json()["counts"]["products"] == 25
+    assert r.json()["model"]["version"] == "propensity-v2"

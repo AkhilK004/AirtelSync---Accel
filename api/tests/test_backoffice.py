@@ -49,12 +49,17 @@ def test_basic_auth_required_everywhere(seeded):
 
 
 # ------------------------------------------------------------------ ranked list with reasons
-def test_seed_creates_30_scored_leads_ranked_by_score_with_reasons(seeded):
+def test_seed_creates_30_scored_leads_ranked_by_expected_value_with_reasons(seeded):
     rows = L()
     assert len(rows) == 31  # 30 seeded + the stuck KYC_ACTION_REQUIRED demo order, derived lazily after 24h
     assert sum(1 for r in rows if r["order_id"]) == 1
     scores = [r["score"] for r in rows]
-    assert scores == sorted(scores, reverse=True) and all(0 < s < 1 for s in scores)
+    assert all(0 < s < 1 for s in scores)
+    ev = [r["expected_value_paise"] for r in rows]
+    assert ev == sorted(ev, reverse=True) and all(isinstance(v, int) for v in ev)  # A62: rank by expected monthly value
+    assert all(r["expected_value_display"].startswith("₹") for r in rows)
+    assert all((r["route"] == "compliance") == bool(r["compliance_hold"]) for r in rows)
+    assert all(r["expected_value_paise"] == 0 for r in rows if r["compliance_hold"])
     assert all(len(r["score_reasons"]) == 3 and r["score_reasons"][0].endswith(("↑", "↓")) for r in rows)
     assert {r["reason"] for r in rows} >= {"price", "kyc_issue", "needs_site_survey"}
     assert all(r["name"] and r["route"] and r["age_hours"] > 0 and r["territory_team"] for r in rows)
@@ -65,14 +70,14 @@ def test_filters(seeded):
     assert {r["route"] for r in L(route="field_sales")} == {"field_sales"}
     assert {r["segment"] for r in L(segment="multi_site")} == {"multi_site"}
     assert {r["stage"] for r in L(stage="kyc")} == {"kyc"}
-    assert len(L(route="partner")) + len(L(route="field_sales")) + len(L(route="telesales")) == len(all_rows)
+    assert sum(len(L(route=q)) for q in ("partner", "field_sales", "telesales", "compliance")) == len(all_rows)
     assert {r["status"] for r in L(status="won")} == {"won"} and len(L(status="won")) == 3
     assert L(route="field_sales", segment="micro_retail") == []
 
 
 def test_routing_rules(seeded):
     for r in L():
-        if r["segment"] in ("multi_site", "manufacturer"):
+        if r["segment"] in ("multi_site", "manufacturer") and not r["compliance_hold"]:
             assert r["route"] == "field_sales"
         if r["route"] == "partner":
             assert r["partner_code"]
@@ -82,6 +87,20 @@ def test_routing_rules(seeded):
     assert leads.route_for("manufacturer", "PRT-X", "Lucknow") == ("field_sales", "PRT-X")     # field force wins, attribution kept
     assert leads.route_for("micro_retail", None, "Mumbai", assisted=True)[0] == "field_sales"
     assert leads.team_for_city("Pune") == "West" and leads.team_for_city("Chennai") == "South" and leads.team_for_city(None) == "Unassigned"
+
+
+def test_compliance_hold_overrides_the_model():
+    """A61: Cancelled/Suspended GSTIN -> compliance desk, expected value 0, whatever the score."""
+    from app.data.loaders import get_data
+    d = get_data()
+    status = d.leads.gstin.map(lambda g: d.gstin[g].status if isinstance(g, str) and g in d.gstin else None)
+    for want, code in (("Cancelled", "gstin_cancelled"), ("Suspended", "gstin_suspended"), ("Active", None)):
+        lid = d.leads.loc[status == want, "lead_id"].iloc[0]
+        assert leads.compliance_hold({"seed_lead_id": lid}) == code
+    assert leads.compliance_hold({"id": "x"}) is None
+    assert leads.expected_value_paise({"score": 0.5, "segment": "micro_retail", "compliance_hold": "gstin_cancelled"}) == 0
+    micro = d.segment_median_bundle_value()["Micro retail & services"]
+    assert leads.expected_value_paise({"score": 0.5, "segment": "micro_retail"}) == int(round(0.5 * micro)) * 100
 
 
 def test_status_change_is_audited_and_validated(seeded):
@@ -160,8 +179,9 @@ def test_callback_requests_become_leads(empty):
 # ------------------------------------------------------------------ scoring inputs
 def test_scoring_features_and_direction():
     base = dict(business_type="Pharmacy", employees=6, locations=1, city_tier=1, language="hi", tools=[], wants=[], channel=None, segment="micro_retail", partner_code=None)
-    r = scoring.raw_row({**base, "has_gstin": True, "tools": ["Mobile hotspot"], "partner_code": "PRT-1"})
-    assert r["lead_source"] == "Channel partner" and r["current_internet"] == "Mobile hotspot" and r["preferred_language"] == "Hindi" and r["has_gstin"] is True
+    r = scoring.raw_row({**base, "has_gstin": True, "tools": ["Mobile hotspot", "Accel mobile"], "partner_code": "PRT-1"})
+    assert r["lead_source"] == "Channel partner" and r["current_internet"] == "Mobile hotspot" and r["has_gstin"] is True and r["current_provider"] == "Accel"
+    assert scoring.raw_row(base)["current_provider"] is None
     assert scoring.raw_row({**base, "has_gstin": False, "channel": "whatsapp"})["lead_source"] == "WhatsApp campaign"
     hi, _ = scoring.score_lead({"raw_features": scoring.raw_row({**base, "has_gstin": True}), "id": "x"})
     lo, _ = scoring.score_lead({"raw_features": scoring.raw_row({**base, "has_gstin": False}), "id": "x"})

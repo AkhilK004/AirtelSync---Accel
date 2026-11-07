@@ -11,6 +11,7 @@ from app.advisor.models import AdvisorSession
 from app.audit import audit
 from app.config import API_ROOT, settings
 from app.data.loaders import get_data
+from app.engine.money import fmt_inr
 from app.engine.pricing import build_quote, new_id
 from app.errors import ApiError
 from app.leads import scoring
@@ -34,6 +35,37 @@ def partner_for_city(city: str | None) -> str | None:
 def team_for_city(city: str | None) -> str:
     state = get_data().city_states().get(city or "")
     return next((t for t, states in routing()["field_teams"].items() if state in states), "Unassigned")
+
+
+def compliance_hold(l: dict) -> str | None:
+    """Business rule over the model (A61): a lead whose GSTIN is Cancelled/Suspended cannot be sold GSTIN-gated products, however
+    likely it is to convert (finding 9: Cancelled GSTINs converted at 10.8%). Returns 'gstin_cancelled' / 'gstin_suspended' /
+    'gstin_inactive' or None. Sources: seeded CSV row's GSTIN, the quote profile, or the GSTIN looked up during KYC."""
+    d = get_data()
+    gstin = None
+    if l.get("seed_lead_id"):
+        hit = d.leads.loc[d.leads["lead_id"] == l["seed_lead_id"], "gstin"]
+        gstin = hit.iloc[0] if len(hit) and isinstance(hit.iloc[0], str) else None
+    if not gstin and l.get("order_id"):
+        from app.kyc import service as kyc
+        gstin = kyc.load(l["order_id"]).declared_gstin
+    if gstin:
+        rec = d.gstin.get(gstin)
+        if rec and rec.status != "Active":
+            return f"gstin_{rec.status.lower()}"
+    qd = get_repo().get("quotes", l["quote_id"]) if l.get("quote_id") else None
+    if qd and (qd.get("profile") or {}).get("gstin_status") == "inactive":
+        return "gstin_inactive"
+    return None
+
+
+def expected_value_paise(l: dict) -> int:
+    """Expected monthly revenue if called = P(activate) x median monthly bundle value of the lead's segment (A62). 0 while on compliance hold."""
+    if l.get("score") is None or l.get("compliance_hold"):
+        return 0
+    values = get_data().segment_median_bundle_value()
+    inr = values.get(scoring.SEGMENT_NAME.get(l.get("segment") or "", ""), values["_all"])
+    return int(round(l["score"] * inr)) * 100  # whole rupees: it is an estimate, not a price
 
 
 def route_for(segment: str | None, partner_code: str | None, city: str | None = None, assisted: bool = False) -> tuple[str, str | None]:
@@ -104,8 +136,14 @@ def refresh() -> int:
 
 
 def _enrich(l: dict) -> dict:
-    """Scores and routes a lead once, then persists (so the list is cheap afterwards)."""
-    if l.get("score") is not None:
+    """Scores, checks compliance and routes a lead once, then persists (so the list is cheap afterwards)."""
+    if l.get("score") is not None and "compliance_hold" in l:
+        return l
+    if l.get("score") is not None:  # scored before the compliance rule existed
+        l["compliance_hold"] = compliance_hold(l)
+        if l["compliance_hold"]:
+            l["route_to"] = "compliance"
+        get_repo().put("leads", l["id"], l)
         return l
     ctx = scoring.context(l)
     prob, reasons = scoring.score_lead(l)
@@ -115,6 +153,9 @@ def _enrich(l: dict) -> dict:
     if l["route_to"] != "field_sales":
         l["route_to"], l["partner_code"] = route_for(l["segment"], l.get("partner_code"), l.get("city"))
     l["score"], l["score_reasons"] = round(prob, 4), reasons
+    l["compliance_hold"] = compliance_hold(l)
+    if l["compliance_hold"]:
+        l["route_to"] = "compliance"  # KYC-assist / GST-restoration desk, not a sales queue
     get_repo().put("leads", l["id"], l)
     return l
 
@@ -130,7 +171,8 @@ def _name(l: dict) -> str:
 def row(l: dict) -> dict:
     return {"id": l["id"], "name": _name(l), "segment": l.get("segment"), "stage": l["stage_reached"], "reason": l["reason"], "route": l["route_to"],
             "partner_code": l.get("partner_code"), "territory_team": team_for_city(l.get("city")), "city": l.get("city"), "score": l.get("score"),
-            "score_reasons": l.get("score_reasons", []), "age_hours": round(_age_minutes(l["created_at"]) / 60, 1), "status": l["status"],
+            "score_reasons": l.get("score_reasons", []),
+            "expected_value_paise": (ev := expected_value_paise(l)), "expected_value_display": fmt_inr(ev), "compliance_hold": l.get("compliance_hold"), "age_hours": round(_age_minutes(l["created_at"]) / 60, 1), "status": l["status"],
             "order_id": l.get("order_id"), "quote_id": l.get("quote_id")}
 
 
@@ -139,7 +181,8 @@ def list_leads(route: str | None = None, segment: str | None = None, stage: str 
     out = [_enrich(l) for l in get_repo().list("leads")]
     out = [l for l in out if (not route or l["route_to"] == route) and (not segment or l.get("segment") == segment)
            and (not stage or l["stage_reached"] == stage) and (not status or l["status"] == status)]
-    out.sort(key=lambda l: (-(l["score"] if l["score"] is not None else -1), l["created_at"]))
+    # Rank by expected monthly value (A62), then probability. Scores are comparable within a routing queue; filter by route for a queue view.
+    out.sort(key=lambda l: (-expected_value_paise(l), -(l["score"] if l["score"] is not None else -1), l["created_at"]))
     return [row(l) for l in out]
 
 

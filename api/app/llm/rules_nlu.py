@@ -37,6 +37,8 @@ TOOL_RULES: list[tuple[str, str, str | None]] = [  # (pattern, tool, implied wan
     (r"upi|qr|paytm|phonepe", "UPI QR", "billing_pos"), (r"\bpos\b|card machine|swipe", "POS machine", "billing_pos"),
     (r"cctv|camera|कैमरा|कॅमेरा", "CCTV", "cctv"), (r"gmail|personal email|yahoo|पर्सनल", "Personal Gmail", None),
     (r"whatsapp business", "WhatsApp Business", None),
+    # already an Accel customer -> propensity feature (A58). Not bare "accel": owners name the company when asking for its products.
+    (r"\baccel\s+(mobile|sim|number|postpaid|prepaid|connection)|(already|currently)\s+(with|on|using|use)\s+accel\b|(accel|एक्सेल|ॲक्सेल)\s*(मोबाइल|सिम)", "Accel mobile", None),
 ]
 WANT_RULES: list[tuple[str, str]] = [
     (r"failover|fail-over|backup (internet|link|connection)|internet (band|down|chala)|internet na ho|इंटरनेट बंद", "failover"),

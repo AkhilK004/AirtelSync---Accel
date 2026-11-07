@@ -52,6 +52,8 @@ flowchart LR
     P4["Pub/Sub order events → BigQuery funnel"]:::dashed
     P5["Provisioning / OSS-BSS"]:::dashed
     P6["Partner app + consent manager"]:::dashed
+    P7["Model ops: weekly drift check, monthly retrain, champion / challenger"]:::dashed
+    P8["Subscriber lookup (existing Accel customer)"]:::dashed
   end
   KYC -.-> P1
   KYC -.-> P2
@@ -59,5 +61,7 @@ flowchart LR
   ORD -.-> P5
   LEAD -.-> P4
   LEAD -.-> P6
+  LEAD -.-> P7
+  LEAD -.-> P8
 
   classDef dashed stroke-dasharray: 5 5,fill:#f6f6f6,color:#555

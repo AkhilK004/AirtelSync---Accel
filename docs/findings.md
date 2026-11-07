@@ -35,18 +35,21 @@ Reproduce: `cd api && python -m uv run python ../scripts/eda.py` (tables), `../s
 ## 4. Data-quality checks
 No out-of-order stage dates; every activated lead has `kyc_complete_date`; `days_lead_to_activation` equals date difference for all 368; no duplicate lead ids / GSTINs / Udyam; all registry links valid; NPS 2-10; no non-positive bundle values. `business_name` repeats 3,066 times (synthetic generator; not a real duplicate key). Only data-quality issue relevant to modelling: 124 leads have null `current_internet`/`current_provider` (imputed "Unknown"). **No rows excluded from training.**
 
-## 5. Propensity model (`app/leads/propensity.py`, `data/derived/propensity.joblib`)
-- Target: `activated`. Features (known at creation/advisor): segment, business type, city tier, source, language, current internet, turnover band, has GSTIN, has Udyam, log employees, num sites, log telecom spend, # products of interest. **Excluded as leakage:** stage reached, outcome, drop reason, all later dates, days to activation, follow-up calls, bundle, value, setup, contract, churn, NPS, acquisition cost (list in `app/leads/features.py`; asserted in tests).
-- Split: time-based. Train created < 2026-06-01 (3,296 rows), test June (1,704 rows, base rate 7.45%).
-- LogisticRegression (class_weight balanced, C=0.3); probability re-calibrated by undoing the balanced prior shift.
+## 5. Propensity model (`app/leads/propensity.py`, `data/derived/propensity.joblib`, card: `docs/model_card.md`)
+- Target: `activated`. **v2 features** (all available when a live lead is scored): segment, city tier, lead source, current internet, has GSTIN, existing Accel customer, log employees, number of sites. **Excluded as leakage:** stage reached, outcome, drop reason, all later dates, days to activation, follow-up calls, bundle, value, setup, contract, churn, NPS, acquisition cost (asserted in tests). **Excluded by design** (measured, see assumptions A59): business type (overfits), language (fairness), turnover / telecom spend / Udyam / products of interest (never asked by the advisor = train/serve skew).
+- Protocol: nested 5x5 repeated stratified CV (C chosen inside each fold), paired comparison with v1 on identical folds, time holdout (train Apr-May 3,296 rows, test June 1,704 rows, base rate 7.45%) with 2,000-sample bootstrap CI, calibration, shuffled-label check, learning curve.
 
-| Model | AUC (test) | Top-decile lift | Top-decile activation rate |
-|---|---|---|---|
-| Logistic regression (shipped) | **0.695** | **2.21x** | 16.5% vs 7.5% base |
-| HistGradientBoosting (comparison) | 0.677 | 1.89x | 14.1% |
+| Model | CV AUC (25 folds) | Train - CV gap | June AUC [95% CI] | Top-decile lift (June) | ECE (June) |
+|---|---|---|---|---|---|
+| v1: 13 features, C=0.3 | 0.689 | 0.064 | 0.695 | 2.21x | 0.026 |
+| **v2: 8 features, tuned C (shipped)** | **0.719** | **0.019** | **0.729 [0.690, 0.767]** | **2.21x** (16.5% vs 7.5%) | **0.022** |
+| HistGradientBoosting on v2 features (comparison) | 0.713 | - | - | - | - |
 
-Calibration on test (predicted mean vs actual, quintiles): 1.0%/0.9%, 2.7%/5.9%, 5.2%/7.6%, 8.9%/7.6%, 17.9%/15.2%. Ranking is monotonic; the middle is slightly under-predicted. Modest AUC is expected: the planted effects (GSTIN, segment, source, hotspot) are strong but outcome is noisy. Use for **ranking whom to call first**, not for forecasting.
-- Reasons are the 3 largest coefficient x value contributions, e.g. `['Has GSTIN ↑', 'Tier-2 city ↓', 'Uses Business broadband ↓']`.
+- v2 beats v1 on 96% of paired folds (mean +0.031 AUC); on June the gain is +0.034 [+0.008, +0.060]. Shuffled-label AUC 0.49 (no leakage through the pipeline). Learning curve 0.696 / 0.709 / 0.715 / 0.720 at 1k / 2k / 3k / 4k rows: still rising slowly, so more leads will help a little; ~0.72 is close to what this noisy synthetic outcome allows.
+- Calibration (June quintiles, predicted / actual): 1.2%/0.9%, 3.1%/2.0%, 5.6%/8.8%, 8.8%/8.8%, 16.8%/16.7%. Brier 0.0664 vs 0.0690 for "always predict the base rate".
+- Strongest drivers (standardised coefficients): Referral source ↑, GSTIN ↑/↓, WhatsApp and website sources ↓, micro retail ↓, existing Accel customer ↑, tier-1 city ↑.
+- Use: rank whom to call first within a routing queue (back-office sorts by probability x segment bundle value), never as a forecast. Cancelled / Suspended GSTIN leads are held for compliance regardless of score.
+- Reasons are the 3 largest coefficient x value contributions, e.g. `['Source: Referral ↑', 'Has GSTIN ↑', 'Not with Accel today ↓']`.
 
 ## 6. Charts (`docs/charts/`)
 `funnel.png`, `activation_by_gstin.png`, `quote_to_kyc_by_gstin.png`, `activation_by_segment.png`, `activation_by_source.png`, `cac_by_source.png`, `churn_by_prior_internet.png`, `churn_by_followup_calls.png`.

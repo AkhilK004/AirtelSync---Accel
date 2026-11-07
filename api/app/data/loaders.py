@@ -116,8 +116,12 @@ class AppData:
     def city_states(self) -> dict[str, str]:
         return self.leads.groupby("city")["state"].first().to_dict()
 
-    def segment_median_spend(self) -> dict[str, int]:
-        return self.leads.groupby("segment")["monthly_telecom_spend_inr"].median().astype(int).to_dict()
+    def segment_median_bundle_value(self) -> dict[str, int]:
+        """Median monthly bundle value (INR, ex-GST) of activated leads per segment, plus "_all" -> expected-value lead ranking."""
+        a = self.leads[self.leads["activated"]]
+        out = a.groupby("segment")["monthly_bundle_value_inr"].median().astype(int).to_dict()
+        out["_all"] = int(a["monthly_bundle_value_inr"].median())
+        return out
 
     def counts(self) -> dict[str, int]:
         return {

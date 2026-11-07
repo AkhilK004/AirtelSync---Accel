@@ -185,7 +185,7 @@ def test_unknown_image_is_unreadable_not_a_crash():
 
 def test_eval_script_matches_expected_csv():
     import subprocess, sys, os
-    env = dict(os.environ, LLM_PROVIDER="fake")
+    env = dict(os.environ, LLM_PROVIDER="fake", PYTHONIOENCODING="utf-8")  # Windows consoles default to cp1252
     out = subprocess.run([sys.executable, "../scripts/eval_kyc.py"], capture_output=True, text=True, env=env, cwd=Path(__file__).parents[1])
     assert out.returncode == 0, out.stdout + out.stderr
     assert "12/12 match" in out.stdout

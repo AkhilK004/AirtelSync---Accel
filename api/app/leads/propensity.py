@@ -13,11 +13,8 @@ from app.leads.features import FEATURES, build_features
 
 MODEL_PATH = (API_ROOT / ".." / "data" / "derived" / "propensity.joblib").resolve()
 
-_NUM_LABEL = {"employee_count_log": "Team size", "num_sites": "Number of sites",
-              "telecom_spend_log": "Telecom spend", "n_interest": "Products asked about"}
-_CAT_LABEL = {"has_gstin_c": "GSTIN", "has_udyam_c": "Udyam", "city_tier_c": "Tier", "segment": "",
-              "lead_source": "Source:", "current_internet": "Uses", "business_type": "",
-              "preferred_language": "Language:", "annual_turnover_band": "Turnover"}
+_NUM_LABEL = {"employee_count_log": "Team size", "num_sites": "Number of sites"}
+_CAT_LABEL = {"has_gstin_c": "GSTIN", "city_tier_c": "Tier", "segment": "", "lead_source": "Source:", "current_internet": "Uses", "accel_existing": "Accel"}
 
 
 @lru_cache(maxsize=1)
@@ -25,14 +22,28 @@ def _load():
     return joblib.load(MODEL_PATH)
 
 
+def model_info() -> dict:
+    """Version + headline metrics for /health and the model card (no data rows)."""
+    try:
+        b = _load()
+    except FileNotFoundError:
+        return {"loaded": False}
+    m = b.get("metrics", {})
+    return {"loaded": True, "version": b.get("model_version", "propensity-v1"), "trained_at": b.get("trained_at"), "n_rows": b.get("n_rows"),
+            "features": b.get("features"), "cv_auc": m.get("nested_cv", {}).get("auc_mean"), "holdout_auc": m.get("time_holdout", {}).get("auc"),
+            "ece": m.get("time_holdout", {}).get("ece_decile")}
+
+
 def _label(feat: str, value_name: str | None, sign: int) -> str:
     arrow = "↑" if sign > 0 else "↓"
     if value_name is None:
         return f"{_NUM_LABEL.get(feat, feat)} {arrow}"
+    if value_name == "infrequent_sklearn":  # pooled rare categories (min_frequency)
+        value_name = "other"
+    if feat == "accel_existing":
+        return ("Existing Accel customer" if value_name == "Y" else "Not with Accel today") + f" {arrow}"
     if feat == "has_gstin_c":
         return ("Has GSTIN" if value_name == "Y" else "No GSTIN") + f" {arrow}"
-    if feat == "has_udyam_c":
-        return ("Has Udyam" if value_name == "Y" else "No Udyam") + f" {arrow}"
     if feat == "city_tier_c":
         return f"Tier-{value_name} city {arrow}"
     return f"{_CAT_LABEL.get(feat, '')} {value_name} {arrow}".replace("  ", " ").strip()

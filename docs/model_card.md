@@ -1,0 +1,47 @@
+# Model card: lead propensity (`propensity-v2`)
+
+**Purpose.** Ranks leads the advisor could not close by how likely they are to activate, so telesales / partners / field force call the best leads first. It is a ranking aid, not a forecast, and it never decides price, eligibility or KYC.
+
+**Code.** Training and evaluation: `scripts/train_propensity.py` (source of truth, ~45 s). Features: `api/app/leads/features.py`. Scoring and reasons: `api/app/leads/propensity.py`. Live inputs: `api/app/leads/scoring.py`. Quality gates: `api/tests/test_propensity.py`. Full metrics: `data/derived/propensity_metrics.json`. Version and training time: `GET /health` -> `model`.
+
+## Data and target
+- 5,000 synthetic leads (`smb_leads.csv`, Apr-Jun 2026), target `activated` (7.4% base rate).
+- Leakage guard: no column that is only known after lead creation (stage, outcome, drop reason, later dates, follow-up calls, bundle, value, churn, NPS, acquisition cost). This is asserted in tests.
+
+## Inputs (8, all available when a live lead is scored)
+| Feature | Live source |
+|---|---|
+| segment | advisor (business type + size -> rules engine) |
+| city tier | advisor city -> `city_tiers.json` |
+| lead source | channel (website / WhatsApp / partner code) |
+| current internet | advisor current-tools chips (hotspot / home broadband / leased line; otherwise "Unknown") |
+| has GSTIN | advisor |
+| existing Accel customer | "Accel mobile" chip; production: subscriber lookup |
+| employees (log), sites | advisor |
+
+Deliberately excluded (measured, `docs/assumptions.md` A59): business type (overfits), preferred language (fairness), turnover / telecom spend / Udyam / products of interest (not collected live, so they would cause train/serve skew).
+
+## Model
+One-hot (categories with < 20 rows pooled) + standardised numerics -> `LogisticRegression(class_weight="balanced")`, with C chosen by 5-fold grid search over {0.01, 0.03, 0.1, 0.3, 1}. Probabilities are calibrated by undoing the balanced-weight prior shift. A linear model was chosen because every score has to come with plain-language reasons (top-3 coefficient x value). Gradient boosting did not beat it (CV AUC 0.713 vs 0.719).
+
+## Evaluation
+| Check | Result | Gate |
+|---|---|---|
+| Nested 5x5 repeated CV AUC | 0.719 ± 0.026 | ≥ 0.70 |
+| Train - validation AUC gap (overfitting) | 0.019 | ≤ 0.04 |
+| June time holdout AUC [bootstrap 95% CI] | 0.729 [0.690, 0.767] | lower bound > 0.65 |
+| Top-decile lift (June) | 2.21x (16.5% vs 7.5%) | - |
+| Calibration: decile ECE / Brier vs base-rate Brier | 0.022 / 0.0664 vs 0.0690 | ECE ≤ 0.03, beat base rate |
+| Shuffled-label AUC (leak check) | 0.49 | 0.45-0.55 |
+| Learning curve 1k / 2k / 3k / 4k rows | 0.696 / 0.709 / 0.715 / 0.720 | non-decreasing (no under-fitting) |
+| vs previous v1 (paired folds) | +0.031 AUC, better on 96% of folds; June +0.034 [+0.008, +0.060] | better on ≥ 80% of folds |
+
+## Known limits and how they are handled
+- **The model learned the old sales process.** Lead source is its strongest input (WhatsApp ↓, referral ↑), and the advisor is meant to fix exactly the WhatsApp leak. Scores are therefore compared **within** a routing queue, and the model must be retrained on advisor-era leads.
+- **Compliance.** A Cancelled / Suspended GSTIN converted as often as an active one in the data. A business rule overrides the model: those leads go to a compliance hold with expected value 0 (A61).
+- **Value, not just probability.** The back-office ranks by P(activate) x the segment's median monthly bundle value (A62).
+- **Fairness.** Language is excluded. City tier stays in because it maps to product availability (catalogue eligibility), not to a person.
+- **Ceiling.** An AUC around 0.72 is close to what this noisy synthetic outcome allows. Much higher numbers on this data usually mean leaked columns.
+
+## Production path (not built, PLAN rule 6)
+Weekly drift check on input distributions (population stability index per feature; alert above 0.2). Monthly retrain on a time split. A challenger is promoted only if it passes every gate above and beats the champion on paired folds. Version and training time are already exposed on `/health`.

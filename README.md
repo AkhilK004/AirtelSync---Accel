@@ -35,7 +35,7 @@ cp .env.local.example .env.local       # NEXT_PUBLIC_API_URL=http://localhost:80
 npm install
 npm run dev                            # http://localhost:3000  (redirects to /en)
 ```
-The model file `data/derived/propensity.joblib` is git-ignored: create it once with `cd api && python -m uv run python ../scripts/train_propensity.py`.
+The model file `data/derived/propensity.joblib` is git-ignored: create it once with `cd api && python -m uv run python ../scripts/train_propensity.py` (~45 s: nested CV, holdout, calibration, sanity checks; quality gates in `api/tests/test_propensity.py`, details in `docs/model_card.md`).
 
 Open http://localhost:3000/hi (Hindi), `/en`, `/mr`. The checkout **OTP is `123456`**. Try the one-shot message *"meri pharmacy hai Lucknow mein, 3 log kaam karte hain, GST hai"*.
 

@@ -17,7 +17,8 @@ import {
 const DEMO_TOKEN = process.env.NEXT_PUBLIC_DEMO_ADMIN_TOKEN ?? "";
 const SEGMENTS = [["micro_retail", "Micro retail"], ["professional_office", "Professional office"], ["multi_site", "Multi-site"], ["manufacturer", "Manufacturer"]];
 const STAGES = ["advisor", "quote", "checkout", "kyc", "order"];
-const ROUTES = [["field_sales", "Field sales"], ["partner", "Partner"], ["telesales", "Telesales"]];
+const ROUTES = [["field_sales", "Field sales"], ["partner", "Partner"], ["telesales", "Telesales"], ["compliance", "Compliance hold"]];
+const HOLD_LABEL: Record<string, string> = { gstin_cancelled: "GSTIN cancelled", gstin_suspended: "GSTIN suspended", gstin_inactive: "GSTIN not active" };
 const STATUSES = ["new", "contacted", "won", "lost"];
 const REASON_LABEL: Record<string, string> = {
   needs_site_survey: "Needs site survey", requested_human: "Asked for a person", price: "Price", abandoned: "Abandoned", quote_not_accepted: "Quote not accepted",
@@ -122,7 +123,7 @@ function Dashboard({ auth, onSignOut }: { auth: string; onSignOut: () => void })
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-36">Score</TableHead><TableHead>Business</TableHead><TableHead>Stage</TableHead><TableHead>Reason</TableHead>
+                <TableHead className="w-36">Score</TableHead><TableHead title="Chance of activating x typical monthly bundle value for the segment">Exp. value / mo</TableHead><TableHead>Business</TableHead><TableHead>Stage</TableHead><TableHead>Reason</TableHead>
                 <TableHead>Route</TableHead><TableHead>Team</TableHead><TableHead>Age</TableHead><TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -135,6 +136,7 @@ function Dashboard({ auth, onSignOut }: { auth: string; onSignOut: () => void })
                       <span className="text-xs tabular-nums">{l.score != null ? `${(l.score * 100).toFixed(0)}%` : "—"}</span>
                     </div>
                   </TableCell>
+                  <TableCell className="tabular-nums">{l.compliance_hold ? <Badge variant="destructive">{HOLD_LABEL[l.compliance_hold] ?? l.compliance_hold}</Badge> : l.expected_value_display}</TableCell>
                   <TableCell><div className="font-medium">{l.name}</div><div className="text-xs text-muted-foreground">{label(SEGMENTS, l.segment)}{l.city ? ` · ${l.city}` : ""}</div></TableCell>
                   <TableCell className="capitalize">{l.stage}</TableCell>
                   <TableCell>{REASON_LABEL[l.reason] ?? l.reason}</TableCell>
@@ -233,6 +235,11 @@ function LeadSheet({ auth, id, onClose, onChanged }: { auth: string; id: string 
               <div className="text-sm font-medium">Why this score ({cur.score != null ? `${(cur.score * 100).toFixed(1)}%` : "—"})</div>
               <div className="mt-1 flex flex-wrap gap-1.5">{cur.score_reasons.map((r) => <Badge key={r} variant={r.endsWith("↑") ? "secondary" : "outline"}>{r}</Badge>)}</div>
             </div>
+            {cur.compliance_hold ? (
+              <div className="rounded-lg border border-destructive/40 p-2 text-sm"><span className="font-medium">Compliance hold:</span> {HOLD_LABEL[cur.compliance_hold] ?? cur.compliance_hold}. GST-only products cannot be sold until the GSTIN is active again; help the owner restore it or use the Udyam path.</div>
+            ) : (
+              <div className="text-sm"><span className="font-medium">Expected value:</span> {cur.expected_value_display} / month (chance of activating x typical bundle value for the segment)</div>
+            )}
             <div className="text-sm"><span className="font-medium">Why it is here:</span> {REASON_LABEL[cur.reason] ?? cur.reason} · stage {cur.stage}</div>
             <dl className="grid grid-cols-2 gap-x-3 gap-y-1 rounded-lg bg-muted p-3 text-sm">
               {Object.entries(cur.profile).map(([k, v]) => <div key={k}><dt className="text-xs text-muted-foreground">{k.replace(/_/g, " ")}</dt><dd>{Array.isArray(v) ? v.join(", ") : String(v)}</dd></div>)}

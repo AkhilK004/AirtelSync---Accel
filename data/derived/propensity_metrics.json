@@ -1,37 +1,103 @@
 {
-  "n_train": 3296,
-  "n_test": 1704,
-  "base_rate_test": 0.07453051643192488,
-  "lr": {
-    "auc": 0.6951,
-    "top_decile_lift": 2.21,
-    "top_decile_rate": 0.1647
+  "model_version": "propensity-v2",
+  "features": [
+    "segment",
+    "city_tier_c",
+    "lead_source",
+    "current_internet",
+    "has_gstin_c",
+    "accel_existing",
+    "employee_count_log",
+    "num_sites"
+  ],
+  "C_final": 0.1,
+  "nested_cv": {
+    "folds": 25,
+    "auc_mean": 0.7191,
+    "auc_sd": 0.0258,
+    "train_auc_mean": 0.7381,
+    "overfit_gap": 0.019,
+    "pr_auc_mean": 0.1557,
+    "top_decile_lift_mean": 2.37,
+    "base_rate": 0.0736,
+    "chosen_C_counts": {
+      "0.03": 6,
+      "0.1": 16,
+      "0.3": 1,
+      "1.0": 2
+    }
   },
-  "lr_calibration_quintiles": [
+  "paired_vs_v1": {
+    "v1_auc_mean": 0.6885,
+    "delta_auc_mean": 0.0306,
+    "delta_auc_sd": 0.0177,
+    "share_folds_v2_better": 0.96
+  },
+  "hgb_cv_auc_mean": 0.7133,
+  "time_holdout": {
+    "n_train": 3296,
+    "n_test": 1704,
+    "base_rate_test": 0.0745,
+    "C": 0.3,
+    "auc": 0.7289,
+    "auc_ci95": [
+      0.6896,
+      0.7666
+    ],
+    "v1_auc": 0.6951,
+    "delta_vs_v1": 0.0338,
+    "delta_vs_v1_ci95": [
+      0.0083,
+      0.0595
+    ],
+    "top_decile_lift": 2.21,
+    "top_decile_rate": 0.1647,
+    "pr_auc": 0.1568,
+    "brier": 0.0664,
+    "brier_base_rate_only": 0.069,
+    "log_loss": 0.2425,
+    "ece_decile": 0.0219,
+    "calibration_quintiles": [
+      {
+        "pred_mean": 0.012,
+        "actual": 0.009
+      },
+      {
+        "pred_mean": 0.031,
+        "actual": 0.02
+      },
+      {
+        "pred_mean": 0.056,
+        "actual": 0.088
+      },
+      {
+        "pred_mean": 0.088,
+        "actual": 0.088
+      },
+      {
+        "pred_mean": 0.168,
+        "actual": 0.167
+      }
+    ]
+  },
+  "shuffled_label_auc": 0.4921,
+  "learning_curve": [
     {
-      "pred_mean": 0.01,
-      "actual": 0.009
+      "n_train": 1000,
+      "cv_auc": 0.6957
     },
     {
-      "pred_mean": 0.027,
-      "actual": 0.059
+      "n_train": 2000,
+      "cv_auc": 0.7091
     },
     {
-      "pred_mean": 0.052,
-      "actual": 0.076
+      "n_train": 3000,
+      "cv_auc": 0.7151
     },
     {
-      "pred_mean": 0.089,
-      "actual": 0.076
-    },
-    {
-      "pred_mean": 0.179,
-      "actual": 0.152
+      "n_train": 4000,
+      "cv_auc": 0.7198
     }
   ],
-  "hgb": {
-    "auc": 0.6767,
-    "top_decile_lift": 1.89,
-    "top_decile_rate": 0.1412
-  }
+  "calibration_method": "class_weight=balanced + analytic prior shift to the training base rate"
 }

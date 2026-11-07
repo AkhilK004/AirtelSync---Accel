@@ -33,11 +33,11 @@ CHIPS = {
     "has_gstin": {"en": [("Yes", "yes"), ("No", "no"), ("Applied", "applied")], "hi": [("हाँ", "yes"), ("नहीं", "no"), ("अप्लाई किया है", "applied")],
                   "mr": [("होय", "yes"), ("नाही", "no"), ("अर्ज केला आहे", "applied")]},
     "current_tools": {"en": [("Mobile hotspot", "mobile hotspot"), ("Home broadband", "home broadband"), ("UPI QR", "UPI QR"), ("POS machine", "POS machine"),
-                             ("CCTV", "CCTV"), ("Personal Gmail", "personal gmail"), ("Leased line", "leased line"), ("WhatsApp Business", "whatsapp business"), ("Skip", "skip")],
+                             ("CCTV", "CCTV"), ("Personal Gmail", "personal gmail"), ("Leased line", "leased line"), ("WhatsApp Business", "whatsapp business"), ("Accel mobile", "accel mobile"), ("Skip", "skip")],
                       "hi": [("मोबाइल हॉटस्पॉट", "mobile hotspot"), ("घर का ब्रॉडबैंड", "home broadband"), ("UPI QR", "UPI QR"), ("POS मशीन", "POS machine"),
-                             ("CCTV", "CCTV"), ("पर्सनल Gmail", "personal gmail"), ("लीज़्ड लाइन", "leased line"), ("WhatsApp Business", "whatsapp business"), ("छोड़ें", "skip")],
+                             ("CCTV", "CCTV"), ("पर्सनल Gmail", "personal gmail"), ("लीज़्ड लाइन", "leased line"), ("WhatsApp Business", "whatsapp business"), ("Accel मोबाइल", "accel mobile"), ("छोड़ें", "skip")],
                       "mr": [("मोबाइल हॉटस्पॉट", "mobile hotspot"), ("घरचा ब्रॉडबँड", "home broadband"), ("UPI QR", "UPI QR"), ("POS मशीन", "POS machine"),
-                             ("CCTV", "CCTV"), ("वैयक्तिक Gmail", "personal gmail"), ("लीज्ड लाइन", "leased line"), ("WhatsApp Business", "whatsapp business"), ("वगळा", "skip")]},
+                             ("CCTV", "CCTV"), ("वैयक्तिक Gmail", "personal gmail"), ("लीज्ड लाइन", "leased line"), ("WhatsApp Business", "whatsapp business"), ("Accel मोबाइल", "accel mobile"), ("वगळा", "skip")]},
 }
 POST_REC_CHIPS = {
     "en": [("See full price", "see price"), ("Why this plan?", "why this plan?"), ("Tell you what I use today", "tools"), ("Talk to a person", "talk to a person")],

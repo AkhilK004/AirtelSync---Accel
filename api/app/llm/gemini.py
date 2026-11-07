@@ -49,7 +49,7 @@ class GeminiClient:
 
     def generate(self, system: str, facts: dict, language: str) -> str:
         t = self._types
-        cfg = t.GenerateContentConfig(system_instruction=system, temperature=0.2)
+        cfg = t.GenerateContentConfig(system_instruction=system, temperature=0)  # PLAN §6.7: deterministic wording for the live scenarios
         payload = {k: v for k, v in facts.items() if k != "template_text"}
         resp = self._call([f"FACTS:\n{json.dumps(payload, ensure_ascii=False)}"], cfg)
         return (resp.text or "").strip()

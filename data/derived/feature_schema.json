@@ -1,21 +1,19 @@
 {
+  "model_version": "propensity-v2",
   "categorical": [
     "segment",
-    "business_type",
     "city_tier_c",
     "lead_source",
-    "preferred_language",
     "current_internet",
-    "annual_turnover_band",
     "has_gstin_c",
-    "has_udyam_c"
+    "accel_existing"
   ],
   "numeric": [
     "employee_count_log",
-    "num_sites",
-    "telecom_spend_log",
-    "n_interest"
+    "num_sites"
   ],
   "target": "activated",
-  "split": "train created<2026-06-01, test June"
+  "C": 0.1,
+  "min_category_count": 20,
+  "split": "nested 5x5 repeated CV + time holdout (train created<2026-06-01, test June)"
 }
