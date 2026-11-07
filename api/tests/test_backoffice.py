@@ -107,7 +107,7 @@ def test_next_action_kyc_assist_for_gstinless_after_quote(seeded):
     for r in rows:
         by_code.setdefault((r["next_action"] or {}).get("code"), []).append(r)
     for r in by_code.get("kyc_assist_udyam", []):
-        assert r["stage"] in ("kyc", "order") and not r["compliance_hold"]
+        assert r["stage"] == "kyc" and not r["compliance_hold"]
         d = c.get(f"/backoffice/leads/{r['id']}", headers=AUTH).json()
         assert d["profile"].get("has_gstin") is not True and "Udyam" in d["next_action"]["text"] and "%" in d["next_action"]["text"]
     assert all(r["compliance_hold"] for r in by_code.get("restore_gstin", []))
@@ -124,6 +124,7 @@ def test_next_action_rules_unit():
     assert a["code"] == "kyc_assist_udyam" and f"{wo:.0%}" in a["text"]
     assert leads.next_action({**base, "raw_features": {"has_gstin": True}}) is None
     assert leads.next_action({**base, "stage_reached": "quote"}) is None
+    assert leads.next_action({**base, "stage_reached": "order"}) is None                    # KYC already complete
     assert leads.next_action({**base, "compliance_hold": "gstin_cancelled"})["code"] == "restore_gstin"
 
 

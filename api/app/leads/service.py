@@ -86,7 +86,7 @@ def next_action(l: dict) -> dict | None:
     hold = l.get("compliance_hold")
     if hold:
         return {"code": "restore_gstin", "text": f"{HOLD_TEXT.get(hold, 'GSTIN not active')}: GST-only products cannot be sold. Help the owner restore the GSTIN with the tax office, or switch to the Udyam-number KYC path."}
-    if l.get("stage_reached") in ("kyc", "order") and _has_gstin(l) is False:
+    if l.get("stage_reached") == "kyc" and _has_gstin(l) is False:  # KYC not complete yet (at "order" it already is)
         w, wo = _quote_accepted_rates()
         return {"code": "kyc_assist_udyam", "text": f"No GSTIN after quote acceptance: offer the Udyam-number KYC path (Udyam lookup + utility bill) and help with the paperwork. "
                                                       f"Only {wo:.0%} of such leads activate vs {w:.0%} with a GSTIN."}

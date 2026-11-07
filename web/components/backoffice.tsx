@@ -18,6 +18,7 @@ const DEMO_TOKEN = process.env.NEXT_PUBLIC_DEMO_ADMIN_TOKEN ?? "";
 const SEGMENTS = [["micro_retail", "Micro retail"], ["professional_office", "Professional office"], ["multi_site", "Multi-site"], ["manufacturer", "Manufacturer"]];
 const STAGES = ["advisor", "quote", "checkout", "kyc", "order"];
 const ROUTES = [["field_sales", "Field sales"], ["partner", "Partner"], ["telesales", "Telesales"], ["compliance", "Compliance hold"]];
+const STAGE_LABEL: Record<string, string> = { advisor: "Advisor", quote: "Quote", kyc: "KYC", order: "Order" };
 const ACTION_LABEL: Record<string, string> = { kyc_assist_udyam: "KYC assist: Udyam path", restore_gstin: "Restore GSTIN" };
 const HOLD_LABEL: Record<string, string> = { gstin_cancelled: "GSTIN cancelled", gstin_suspended: "GSTIN suspended", gstin_inactive: "GSTIN not active" };
 const STATUSES = ["new", "contacted", "won", "lost"];
@@ -139,7 +140,7 @@ function Dashboard({ auth, onSignOut }: { auth: string; onSignOut: () => void })
                   </TableCell>
                   <TableCell className="tabular-nums">{l.compliance_hold ? <Badge variant="destructive">{HOLD_LABEL[l.compliance_hold] ?? l.compliance_hold}</Badge> : l.expected_value_display}</TableCell>
                   <TableCell><div className="font-medium">{l.name}</div><div className="text-xs text-muted-foreground">{label(SEGMENTS, l.segment)}{l.city ? ` · ${l.city}` : ""}</div>{l.next_action ? <Badge variant="outline" className="mt-1" title={l.next_action.text}>{ACTION_LABEL[l.next_action.code] ?? l.next_action.code}</Badge> : null}</TableCell>
-                  <TableCell className="capitalize">{l.stage}</TableCell>
+                  <TableCell>{STAGE_LABEL[l.stage] ?? l.stage}</TableCell>
                   <TableCell>{REASON_LABEL[l.reason] ?? l.reason}</TableCell>
                   <TableCell>{label(ROUTES, l.route)}{l.partner_code ? <div className="text-xs text-muted-foreground">{l.partner_code}</div> : null}</TableCell>
                   <TableCell>{l.territory_team}</TableCell>
@@ -248,7 +249,7 @@ function LeadSheet({ auth, id, onClose, onChanged }: { auth: string; id: string 
             ) : (
               <div className="text-sm"><span className="font-medium">Expected value:</span> {cur.expected_value_display} / month (chance of activating x typical bundle value for the segment)</div>
             )}
-            <div className="text-sm"><span className="font-medium">Why it is here:</span> {REASON_LABEL[cur.reason] ?? cur.reason} · stage {cur.stage}</div>
+            <div className="text-sm"><span className="font-medium">Why it is here:</span> {REASON_LABEL[cur.reason] ?? cur.reason} · stage {STAGE_LABEL[cur.stage] ?? cur.stage}</div>
             <dl className="grid grid-cols-2 gap-x-3 gap-y-1 rounded-lg bg-muted p-3 text-sm">
               {Object.entries(cur.profile).map(([k, v]) => <div key={k}><dt className="text-xs text-muted-foreground">{k.replace(/_/g, " ")}</dt><dd>{Array.isArray(v) ? v.join(", ") : String(v)}</dd></div>)}
               {cur.phone_masked && <div><dt className="text-xs text-muted-foreground">phone</dt><dd>{cur.phone_masked}</dd></div>}

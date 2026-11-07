@@ -12,14 +12,14 @@ from app.advisor.slots import CITY_ALIASES, SlotUpdate, band_value, city_tiers
 NUMW = {"one": 1, "single": 1, "ek": 1, "एक": 1, "two": 2, "do": 2, "दो": 2, "दोन": 2, "three": 3, "teen": 3, "तीन": 3,
         "four": 4, "char": 4, "चार": 4, "five": 5, "paanch": 5, "पाँच": 5, "पांच": 5, "पाच": 5}
 _NUM = r"(\d+|" + "|".join(sorted(NUMW, key=len, reverse=True)) + r")"
-EMP_UNITS = r"(?:log|people|persons?|staff|employees?|workers?|members?|karmachari|karamchari|कर्मचारी|कामगार|लोगों|लोग|लोक|जण|माणसे|स्टाफ|वर्कर्स)"
-LOC_UNITS = (r"(?:outlets?|stores?|shops?|branch(?:es)?|locations?|sites?|offices?|centres?|centers?|plants?|clinics?|factory|factories|showrooms?|"
+EMP_UNITS = r"(?:log|lok|people|teachers?|doctors?|lawyers?|engineers?|persons?|staff|employees?|workers?|members?|karmachari|karamchari|कर्मचारी|कामगार|लोगों|लोग|लोक|जण|माणसे|स्टाफ|वर्कर्स)"
+LOC_UNITS = (r"(?:outlets?|stores?|shops?|branch(?:es)?|locations?|sites?|offices?|centres?|centers?|plants?|clinics?|क्लिनिक|क्लीनिक|factory|factories|showrooms?|"
              r"dukaan|dukan|दुकानें|दुकाने|दुकान|शाखाएं|शाखा|आउटलेट|ठिकाणे|ठिकाण|जगह|ऑफिस|कार्यालय)")
 
 BT_RULES: list[tuple[str, str]] = [
     (r"pharmacy chain", "Pharmacy chain"), (r"bakery chain", "Bakery chain"), (r"restaurant chain", "Restaurant chain"),
     (r"mobile repair", "Mobile repair shop"), (r"physio", "Physiotherapy clinic"), (r"dental|dentist|दंत", "Dental clinic"),
-    (r"pharmacy|medical store|chemist|फार्मेसी|फार्मसी|मेडिकल", "Pharmacy"), (r"kirana|grocery|provision|किराणा|किराना|general store", "Kirana store"),
+    (r"pharm?acy|pharmcy|farmacy|medical store|chemist|फार्मेसी|फार्मसी|मेडिकल", "Pharmacy"), (r"kirana|grocery|provision|किराणा|किराना|general store", "Kirana store"),
     (r"salon|parlou?r|सैलून|सलून|ब्यूटी", "Salon"), (r"\bca\b|chartered|accountant|ca firm|सीए", "CA firm"),
     (r"coaching|tuition|classes|कोचिंग|ट्यूशन", "Coaching centre"), (r"law office|lawyer|advocate|वकील|वकिल", "Law office"),
     (r"travel", "Travel agency"), (r"architect", "Architecture studio"), (r"real estate|property dealer|प्रॉपर्टी", "Real estate agency"),
@@ -104,9 +104,11 @@ def _gstin(text: str) -> str | None:
     g = r"(?:g\.?s\.?t(?:in)?|जीएसटी|जी\.एस\.टी)"
     if re.search(rf"(?:no|without|nahi|nahin|don'?t have|dont have|na|बिना|नहीं|नाही)\s+(?:\w+\s+){{0,2}}{g}|{g}\s*(?:\w+\s+){{0,2}}(?:nahi|nahin|no\b|नहीं|नाही|नसेल)", t):
         return "no"
+    if re.search(rf"(?:\bnot|n't|isn't|without)\s+(?:\w+\s+){{0,3}}{g}|{g}\s*(?:\w+\s+){{0,3}}(?:not\b|invalid|inactive|cancelled|suspended)", t):
+        return "no"  # "GST not registered", "not registered for GST", "GST invalid" (negation must beat the 'registered/active' yes-words)
     if re.search(rf"{g}.{{0,20}}(?:applied|apply|process|pending|laga|अप्लाई|अर्ज)|(?:applied|apply|अप्लाई|अर्ज).{{0,20}}{g}", t):
         return "applied"
-    if re.search(rf"{g}", t) and re.search(r"hai|haan|yes|have|है|आहे|होय|हां|हाँ|ho\b|with|number|there|आहे", t):
+    if re.search(rf"{g}", t) and re.search(r"hai|haan|yes|have|है|आहे|होय|हां|हाँ|ho\b|with|number|there|registered|active|valid|aahe|आहे", t):
         return "yes"
     if re.search(rf"(?:with|have|has)\s+{g}", t):
         return "yes"
@@ -161,6 +163,10 @@ def parse(text: str, pending: str | None = None) -> SlotUpdate:
     m = re.search(rf"(?<![a-z]){_NUM}\s*(?:hi\s+|only\s+)?(?:{LOC_UNITS})", t)
     if m:
         u.locations = _num(m.group(1))
+    if u.locations is None:  # "15 retail stores", "4 small shops": an adjective between the number and a plural unit
+        m = re.search(r"(?<![a-z])(\d+)\s+(?:\w+\s+){1,2}?(?:outlets|stores|shops|branches|showrooms|locations|sites|offices|clinics)\b", t)
+        if m and not re.search(rf"{m.group(1)}\s+(?:{EMP_UNITS})", t):
+            u.locations = int(m.group(1))
     # city / gstin / budget
     c = _city(raw)
     if c:
