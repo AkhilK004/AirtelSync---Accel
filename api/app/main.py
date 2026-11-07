@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.data.loaders import get_data
-from app import errors
+from app import errors, hardening
 from app import logging as pii_logging
 from app.routers import admin, advisor, backoffice, checkout, consent, health, kyc, mocks, orders, quotes
 
@@ -20,6 +20,7 @@ async def lifespan(_: FastAPI):
 
 
 pii_logging.install()
+hardening.assert_prod_secrets()
 app = FastAPI(title="Udyam Digital API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +28,7 @@ app.add_middleware(
     allow_methods=["*"], allow_headers=["*"],
 )
 errors.install(app)
+hardening.install(app)
 app.include_router(health.router)
 app.include_router(mocks.router)
 app.include_router(quotes.router)

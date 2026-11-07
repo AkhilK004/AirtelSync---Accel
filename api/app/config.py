@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:3000"
     GST_RATE: float = 0.18
     DATA_DIR: str = "../data/raw"
+    RATE_LIMIT_ENABLED: bool = True
     SEED_ON_START: bool = False  # demo: seed back-office leads + 3 live orders at startup
 
     # Tunable business constants (see docs/assumptions.md)

@@ -6,6 +6,8 @@ from app.repo.memory import MemoryRepo
 
 @lru_cache(maxsize=1)
 def get_repo():
-    if settings.STORAGE == "firestore":  # implemented in Phase 8
-        raise NotImplementedError("FirestoreRepo arrives in Phase 8")
+    if settings.STORAGE == "firestore":
+        from app.repo.firestore import FirestoreRepo
+
+        return FirestoreRepo()
     return MemoryRepo()
