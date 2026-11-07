@@ -108,6 +108,11 @@ class AppData:
     def products(self) -> dict[str, Product]:
         return {p.sku: p for p in self.catalogue}
 
+    def business_type_segments(self) -> dict[str, str]:
+        """business_type -> dominant lead segment (derived from leads data)."""
+        g = self.leads.groupby("business_type")["segment"].agg(lambda x: x.value_counts().index[0])
+        return g.to_dict()
+
     def counts(self) -> dict[str, int]:
         return {
             "products": len(self.catalogue), "leads": len(self.leads),

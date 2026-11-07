@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     NAME_MATCH_WARN: int = 75
     MAX_QUESTIONS: int = 6
     ABANDON_MINUTES: int = 10
+    MOCK_LATENCY_MS_MIN: int = 300
+    MOCK_LATENCY_MS_MAX: int = 600
 
     @property
     def data_path(self) -> Path:
@@ -38,3 +40,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# --- Phase 2 engine constants (documented in docs/assumptions.md) ---
+MULTI_SITE_MIN_LOCATIONS = 3   # data: all multi-site leads have 3-12 sites; others have 1-2
+MULTI_SITE_MAX_LOCATIONS = 10  # above this -> assisted (field force); plan default
+PRICE_POINT_RULE = "midpoint"  # unit price = midpoint of [min,max] rounded half-up to whole rupee
+ASSISTED_CALLBACK_HOURS = 4

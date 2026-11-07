@@ -1,0 +1,53 @@
+# Bundle templates per segment. SKUs reference product_catalogue.csv ids only (no prices here).
+# Composition and quantities are informed by what activated leads actually bought (docs/assumptions.md A13).
+# candidates: ordered tiers; fallback:true are used only when no regular tier is eligible. fits_up_to = max employees the tier suits; requires_fibre=true skips if site has no fibre.
+# qty kinds: fixed{n} | sites | sites_x{n} | employees_ratio{ratio,min,max}
+micro_retail:
+  name: {en: "Dukaan Starter", hi: "दुकान स्टार्टर", mr: "दुकान स्टार्टर"}
+  needs:
+    - {need: connectivity, required: true, candidates: [{sku: P01, fits_up_to: 999, requires_fibre: true}, {sku: P04, fits_up_to: 999, fallback: true}], qty: {kind: sites}}
+    - {need: business_sim, required: true, candidates: [{sku: P07, fits_up_to: 999}], qty: {kind: employees_ratio, ratio: 0.5, min: 1, max: 4}}
+    - {need: billing_pos, required: false, default_on: false, candidates: [{sku: P19, fits_up_to: 999}], qty: {kind: fixed, n: 1}}
+    - {need: customer_messaging, required: false, default_on: false, candidates: [{sku: P15, fits_up_to: 999}], qty: {kind: fixed, n: 1}}
+    - {need: guest_wifi, required: false, default_on: false, candidates: [{sku: P22, fits_up_to: 999}], qty: {kind: sites}}
+    - {need: cctv, required: false, default_on: false, candidates: [{sku: P23, fits_up_to: 999}], qty: {kind: fixed, n: 2}}
+    - {need: website, required: false, default_on: false, candidates: [{sku: P18, fits_up_to: 999}], qty: {kind: fixed, n: 1}}
+professional_office:
+  name: {en: "Pro Office", hi: "प्रो ऑफिस", mr: "प्रो ऑफिस"}
+  needs:
+    - {need: connectivity, required: true, candidates: [{sku: P01, fits_up_to: 10, requires_fibre: true}, {sku: P02, fits_up_to: 25, requires_fibre: true}, {sku: P03, fits_up_to: 999, requires_fibre: true}, {sku: P04, fits_up_to: 999, fallback: true}], qty: {kind: sites}}
+    - {need: business_sim, required: true, candidates: [{sku: P07, fits_up_to: 999}], qty: {kind: employees_ratio, ratio: 0.33, min: 2, max: 6}}
+    - {need: cloud_email, required: true, candidates: [{sku: P16, fits_up_to: 999}], qty: {kind: employees_ratio, ratio: 1.0, min: 1, max: 40}}
+    - {need: security, required: true, candidates: [{sku: P20, fits_up_to: 999}], qty: {kind: employees_ratio, ratio: 1.0, min: 1, max: 40}}
+    - {need: backup, required: false, default_on: false, candidates: [{sku: P17, fits_up_to: 999}], qty: {kind: fixed, n: 1}}
+    - {need: failover, required: false, default_on: false, candidates: [{sku: P09, fits_up_to: 999}], qty: {kind: sites}}
+    - {need: static_ip, required: false, default_on: false, candidates: [{sku: P11, fits_up_to: 999}], qty: {kind: fixed, n: 1}}
+    - {need: business_phone, required: false, default_on: false, candidates: [{sku: P12, fits_up_to: 999}], qty: {kind: employees_ratio, ratio: 0.2, min: 2, max: 6}}
+    - {need: cctv, required: false, default_on: false, candidates: [{sku: P23, fits_up_to: 999}], qty: {kind: fixed, n: 4}}
+    - {need: guest_wifi, required: false, default_on: false, candidates: [{sku: P22, fits_up_to: 999}], qty: {kind: sites}}
+multi_site:
+  name: {en: "Multi-Site Connect", hi: "मल्टी-साइट कनेक्ट", mr: "मल्टी-साइट कनेक्ट"}
+  needs:
+    - {need: connectivity, required: true, candidates: [{sku: P01, fits_up_to: 40, requires_fibre: true}, {sku: P02, fits_up_to: 999, requires_fibre: true}, {sku: P04, fits_up_to: 999, fallback: true}], qty: {kind: sites}}
+    - {need: business_sim, required: true, candidates: [{sku: P08, fits_up_to: 999}], qty: {kind: employees_ratio, ratio: 0.1, min: 2, max: 12}}
+    - {need: failover, required: true, candidates: [{sku: P09, fits_up_to: 999}], qty: {kind: sites}}
+    - {need: central_management, required: false, default_on: false, candidates: [{sku: P10, fits_up_to: 999}], qty: {kind: sites}}
+    - {need: firewall, required: false, default_on: false, candidates: [{sku: P21, fits_up_to: 999}], qty: {kind: sites}}
+    - {need: billing_pos, required: false, default_on: false, candidates: [{sku: P19, fits_up_to: 999}], qty: {kind: sites}}
+    - {need: guest_wifi, required: false, default_on: false, candidates: [{sku: P22, fits_up_to: 999}], qty: {kind: sites}}
+    - {need: cctv, required: false, default_on: false, candidates: [{sku: P23, fits_up_to: 999}], qty: {kind: sites_x, n: 2}}
+    - {need: toll_free, required: false, default_on: false, candidates: [{sku: P13, fits_up_to: 999}], qty: {kind: fixed, n: 1}}
+    - {need: customer_messaging, required: false, default_on: false, candidates: [{sku: P15, fits_up_to: 999}], qty: {kind: fixed, n: 1}}
+    - {need: fleet_tracking, required: false, default_on: false, candidates: [{sku: P25, fits_up_to: 999}], qty: {kind: fixed, n: 2}}
+manufacturer:
+  name: {en: "Factory Connect", hi: "फैक्ट्री कनेक्ट", mr: "फॅक्टरी कनेक्ट"}
+  needs:
+    - {need: connectivity, required: true, candidates: [{sku: P05, fits_up_to: 24}, {sku: P06, fits_up_to: 999}, {sku: P03, fits_up_to: 999, requires_fibre: true}, {sku: P02, fits_up_to: 999, requires_fibre: true}, {sku: P04, fits_up_to: 999, fallback: true}], qty: {kind: sites}}
+    - {need: business_sim, required: true, candidates: [{sku: P08, fits_up_to: 999}], qty: {kind: employees_ratio, ratio: 0.1, min: 2, max: 15}}
+    - {need: cloud_email, required: true, candidates: [{sku: P16, fits_up_to: 999}], qty: {kind: employees_ratio, ratio: 0.3, min: 2, max: 40}}
+    - {need: security, required: true, candidates: [{sku: P20, fits_up_to: 999}], qty: {kind: employees_ratio, ratio: 0.3, min: 2, max: 40}}
+    - {need: firewall, required: false, default_on: false, candidates: [{sku: P21, fits_up_to: 999}], qty: {kind: sites}}
+    - {need: machine_monitoring, required: false, default_on: false, candidates: [{sku: P24, fits_up_to: 999}], qty: {kind: fixed, n: 8}}
+    - {need: static_ip, required: false, default_on: false, candidates: [{sku: P11, fits_up_to: 999}], qty: {kind: fixed, n: 1}}
+    - {need: cctv, required: false, default_on: false, candidates: [{sku: P23, fits_up_to: 999}], qty: {kind: fixed, n: 8}}
+    - {need: fleet_tracking, required: false, default_on: false, candidates: [{sku: P25, fits_up_to: 999}], qty: {kind: fixed, n: 2}}
