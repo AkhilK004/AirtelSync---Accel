@@ -1,6 +1,6 @@
 # Deploy runbook (Phase 8)
 
-Status: **image build, hardening and a local dry run are done; nothing is deployed to GCP.** The only authenticated gcloud project (`geoseolab`) is unrelated to this hackathon, so the cloud deploy was deliberately skipped pending a project you choose.
+Status: **deployed to project `airtel-514013` (asia-south1) on 2026-11-07.** API https://udyam-api-pgpuxkitcq-el.a.run.app , web https://udyam-web-pgpuxkitcq-el.a.run.app (both Cloud Run). Build `27a29b1`, model `propensity-v3`, Gemini on Vertex. **17/17 advisor scenarios pass against the deployed API** (`run_scenarios.py --base-url ... --provider gemini`); the deployed quote page was checked in a browser (add-on toggle changes the total, no console errors, no overflow). CORS allows only the web origin (checked: a foreign origin gets no header). Not done: a full phone click-through in Hindi, KYC upload on the live URL, the budget alert. The admin token and back-office password were generated at deploy time and printed once; they are not in the repo.
 
 Dry run done (local Docker, `LLM_PROVIDER=fake`, memory store, seeded): image `udyam-api` builds (1.95 GB, trains the model at build time, runs as non-root user), `/health` ok, **17/17 advisor scenarios pass over HTTP against the container**, a full consent -> upload -> KYC -> order flow works (K03 approved -> `INSTALL_SCHEDULED`), back-office and admin reject missing/wrong credentials, security headers present, and the container log contains no full phone number.
 
