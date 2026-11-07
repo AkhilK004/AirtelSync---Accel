@@ -34,7 +34,7 @@ python -m uv run python ../scripts/run_scenarios.py --base-url https://<api-url>
 LLM_PROVIDER=gemini python -m uv run python ../scripts/eval_kyc.py --provider gemini                    # needs Vertex credentials locally (gcloud auth application-default login)
 curl https://<api-url>/health                                                                            # shows counts + BUILD_SHA
 ```
-`run_scenarios.py --base-url` talks to the live HTTP API, so the LLM mode is whatever the service runs (Gemini). The first live Gemini run has **not** happened yet: expect to tune NLU prompts / the rule fallbacks if a scenario fails.
+`run_scenarios.py --base-url` talks to the live HTTP API, so the LLM mode is whatever the service runs (Gemini). A live Gemini run **has** happened locally against project `airtel-514013` (see assumptions A57): advisor 17/17 twice, KYC 12/12. Against the deployed service it has not run yet.
 
 ## Hardening in place
 - Upload checks: 5 MB cap, content sniffing (PNG/JPEG/PDF only, client MIME ignored), bounded read.

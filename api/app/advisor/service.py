@@ -54,14 +54,31 @@ def start_session(language: str | None = None, channel: str | None = None, partn
 
 
 # ------------------------------------------------------------------ NLU
+def hybrid(u: SlotUpdate, r: SlotUpdate) -> SlotUpdate:
+    """LLM understanding first; the deterministic parser fills what the LLM left empty and adds keyword-certain facts
+    (tools, wants, unavailable items, injection and handoff intents). Lists are unions; on conflict the LLM wins."""
+    d = u.model_copy(deep=True)
+    for f in ("business_type", "employees", "locations", "city", "has_gstin", "budget_monthly", "fibre_available", "requested_unavailable_item", "language"):
+        if getattr(d, f) is None and getattr(r, f) is not None:
+            setattr(d, f, getattr(r, f))
+    for f in ("current_tools", "wants", "dont_know"):
+        setattr(d, f, list(dict.fromkeys([*getattr(u, f), *getattr(r, f)])))
+    d.injection_attempt = u.injection_attempt or r.injection_attempt
+    if d.intent in ("answer", "smalltalk", "off_topic") and r.intent in ("request_human", "ask_why", "ask_price"):
+        d.intent = r.intent
+    return d
+
+
 def _nlu(sess: AdvisorSession, text: str) -> SlotUpdate:
     payload = json.dumps({"pending_slot": sess.pending_slot, "known_slots": sess.slots.model_dump(), "message": text}, ensure_ascii=False)
+    rules = rule_parse(text, sess.pending_slot)
     try:
         u = get_llm().extract(NLU_SYSTEM, [payload], SlotUpdate)
-        return u if isinstance(u, SlotUpdate) else SlotUpdate.model_validate(u)
+        u = u if isinstance(u, SlotUpdate) else SlotUpdate.model_validate(u)
     except Exception as e:  # noqa: BLE001 - never fail a turn on NLU; fall back to deterministic rules
         log.warning("nlu_fallback %s", type(e).__name__)
-        return rule_parse(text, sess.pending_slot)
+        return rules
+    return hybrid(u, rules)
 
 
 def _merge(sess: AdvisorSession, u: SlotUpdate) -> bool:
@@ -254,6 +271,29 @@ def _compose(facts: dict) -> str:
     return out
 
 
+def ensure_required(text: str, facts: dict) -> tuple[str, bool]:
+    """Facts the owner must be told are appended (deterministic template sentence) when the LLM's wording left them out."""
+    lang, low, extra = facts["language"], text.lower(), []
+    item = facts.get("unavailable_item")
+    if item and item.lower() not in low:
+        extra.append(T.tr(T.M["ack_unavailable"], lang, item=item).strip())
+    ll = facts.get("leased_line")
+    if ll and not any(w in low for w in ("leased", "लीज़्ड", "लीज्ड")):
+        extra.append((T.tr(T.M["leased_unavailable"], lang, reason=ll["reason"]) + T.tr(T.M["leased_alt"], lang)).strip() if not ll["available"] else T.tr(T.M["leased_survey"], lang).strip())
+    rec = facts.get("recommendation")
+    if rec and facts.get("no_gstin_hint") and "udyam" not in low and "उद्यम" not in low:
+        extra.append(T.tr(T.M["no_gstin_hint"], lang))
+    b = facts.get("budget")
+    if b and b["budget_display"] not in text:
+        key = "budget_trim" if b["over_budget_by_extras"] else "budget_over"
+        extra.append(T.tr(T.M[key], lang, budget=b["budget_display"], cheapest=b["cheapest_display"], gap=b["gap_display"] or "", names=", ".join((rec or {}).get("addon_names", [])) or "—"))
+    if rec and rec.get("assisted") and str(ASSISTED_CALLBACK_HOURS) not in text:
+        extra.append(T.tr(T.M["assisted_called"], lang, hours=ASSISTED_CALLBACK_HOURS))
+    if facts.get("refusal") and not any(w in low for w in ("can't", "cannot", "unable", "नहीं", "नाही")):
+        extra.append(T.tr(T.M["ack_refusal"], lang).strip())
+    return (text + chr(10) + chr(10).join(extra), True) if extra else (text, False)
+
+
 def _render(sess: AdvisorSession, facts: dict) -> tuple[str, bool]:
     facts["template_text"] = _compose(facts)
     try:
@@ -263,11 +303,13 @@ def _render(sess: AdvisorSession, facts: dict) -> tuple[str, bool]:
         return facts["template_text"], True
     if text == facts["template_text"]:
         return text, False
+    text = re.sub(r"\*+", "", text)  # the chat bubble is plain text: strip any markdown the model adds
     bad = violations(text, facts, sess.language)
     if bad or not text:
         log.warning("nlg_violation count=%d kinds=%s", len(bad), sorted({b.split(":")[0] for b in bad}))
         return facts["template_text"], True
-    return text, False
+    text, added = ensure_required(text, facts)
+    return text, added
 
 
 # ------------------------------------------------------------------ main turn

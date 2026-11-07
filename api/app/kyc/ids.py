@@ -76,3 +76,37 @@ def aadhaar_ok(num: str | None) -> bool:
 def mask_aadhaar(num: str | None) -> str | None:
     d = re.sub(r"\D", "", num or "")
     return "XXXXXXXX" + d[-4:] if len(d) >= 4 else None
+
+
+# ---- OCR confusable repair (0/O, 1/I, 5/S, 8/B, 2/Z, 6/G). Position-aware and checksum-gated: a repair is accepted ONLY if the
+# repaired GSTIN passes format + checksum, so a real typing error (e.g. a wrong digit) is never "fixed".
+_TO_DIGIT = {"O": "0", "I": "1", "S": "5", "B": "8", "Z": "2", "G": "6"}
+_TO_LETTER = {v: k for k, v in _TO_DIGIT.items()}
+_DIGIT_POS = {0, 1, 7, 8, 9, 10}
+_LETTER_POS = {2, 3, 4, 5, 6, 11, 13}
+
+
+def repair_gstin(raw: str | None) -> str | None:
+    g = norm_gstin(raw)
+    if not g or len(g) != 15 or (gstin_format_ok(g) and gstin_checksum_ok(g)):
+        return g
+    chars = list(g)
+    for i, ch in enumerate(chars):
+        if i in _DIGIT_POS and ch in _TO_DIGIT:
+            chars[i] = _TO_DIGIT[ch]
+        elif i in _LETTER_POS and ch in _TO_LETTER:
+            chars[i] = _TO_LETTER[ch]
+    base = "".join(chars)
+    for last in {base[14], _TO_LETTER.get(base[14], base[14]), _TO_DIGIT.get(base[14], base[14])}:  # position 15 may be a letter or a digit
+        cand = base[:14] + last
+        if gstin_format_ok(cand) and gstin_checksum_ok(cand):
+            return cand
+    return g
+
+
+def fix_wrapped_pincode(addr: str | None) -> str | None:
+    """'... Kerala - 75 2083' (pincode split over two printed lines) -> '... Kerala - 752083' when the two groups make exactly 6 digits."""
+    if not addr:
+        return addr
+    m = re.search(r"(\d{1,5})\s+(\d{1,5})\s*$", addr)
+    return addr[: m.start()] + m.group(1) + m.group(2) if m and len(m.group(1)) + len(m.group(2)) == 6 else addr

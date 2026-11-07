@@ -169,3 +169,30 @@ def test_fixture_covers_all_images(applicant):
     from app.llm.fake import _fixture
     for f in D.kyc[applicant]:
         assert hashlib.sha256(open(f.path, "rb").read()).hexdigest() in _fixture()
+
+
+# ---------------------------------------------------------------- OCR repair (found in the first live Gemini run)
+def test_repair_gstin_fixes_confusables_only_when_checksum_passes():
+    assert ids.repair_gstin("19E0GXH4115Y1ZL") == "19EOGXH4115Y1ZL"      # K02: letter O read as zero
+    assert ids.repair_gstin("24X0RXG9365M1Z3") == "24XORXG9365M1Z3"      # K08
+    assert ids.repair_gstin("27PZSXS1936O1ZH") == "27PZSXS1936O1ZH"      # already valid: untouched
+    assert ids.repair_gstin("08YKZXS8189L1Z0") == "08YKZXS8189L1Z0"      # K06: a genuinely wrong digit is NOT repaired
+    assert ids.repair_gstin("08YKZXS8189L1ZO") == "08YKZXS8189L1ZO"
+    assert ids.repair_gstin("abc") == "ABC" and ids.repair_gstin(None) is None
+
+
+def test_wrapped_pincode_fix():
+    assert ids.fix_wrapped_pincode("Shop/Unit 38, Civil Lines, Kochi, Kerala - 75 2083") == "Shop/Unit 38, Civil Lines, Kochi, Kerala - 752083"
+    assert ids.fix_wrapped_pincode("Shop/Unit 38, Kochi, Kerala - 752083") == "Shop/Unit 38, Kochi, Kerala - 752083"
+    assert ids.fix_wrapped_pincode("Plot 12 45, Kochi") == "Plot 12 45, Kochi"     # not a 6-digit split
+    assert ids.fix_wrapped_pincode(None) is None
+
+
+def test_extract_normalises_model_output(monkeypatch):
+    from app.kyc import extract
+    from app.llm import get_llm
+    from app.models.kyc import GstCertExtract
+    raw = GstCertExtract(doc_type_detected="gst_certificate", gstin="19E0GXH4115Y1ZL", address="Kolkata, West Bengal - 34 7550", confidence=0.9)
+    monkeypatch.setattr(get_llm(), "extract", lambda *a, **k: raw)
+    out = extract.extract_document("gst_certificate", b"x", "image/png")
+    assert out.gstin == "19EOGXH4115Y1ZL" and out.address.endswith("347550")

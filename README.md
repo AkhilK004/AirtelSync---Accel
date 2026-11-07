@@ -63,7 +63,7 @@ Browser smoke tests (Playwright, not part of the web deps) are in `scripts/e2e_*
 `APP_ENV`, `STORAGE` (`memory` | `firestore`), `LLM_PROVIDER` (`gemini` | `fake`), `GEMINI_MODEL`, `GCP_PROJECT`, `GCP_LOCATION`, `GOOGLE_API_KEY`, `GCS_REVIEW_BUCKET`, `BACKOFFICE_USER` / `BACKOFFICE_PASSWORD`, `ADMIN_TOKEN`, `CORS_ORIGINS`, `GST_RATE`, `DATA_DIR`. Extras: `SEED_ON_START`, `RATE_LIMIT_ENABLED`. With `APP_ENV=prod` the API refuses to start on default secrets.
 
 ## Live Gemini
-Set `LLM_PROVIDER=gemini` with Vertex AI credentials (`gcloud auth application-default login`, `GCP_PROJECT`) or an AI Studio `GOOGLE_API_KEY`. **The live model has not been run against the scenarios or KYC specimens yet**: all green results above are the offline path. Expect to tune prompts on the first live run.
+Set `LLM_PROVIDER=gemini` with Vertex AI credentials (`gcloud auth application-default login`, `GCP_PROJECT`) or an AI Studio `GOOGLE_API_KEY`. Live run (project `airtel-514013`, Mumbai): **17/17 advisor scenarios (two runs) and 12/12 KYC applicants on real vision extraction** after the fixes in `docs/assumptions.md` A57. The NLG step is not deterministic, so re-run before the demo; the offline suite uses the fake LLM.
 
 ## Deploy
 `docs/deploy.md` and `scripts/deploy_gcp.sh` (dry-run by default). **Not deployed yet.** A local Docker dry run passed (`docker build -t udyam-api .`).
@@ -79,4 +79,4 @@ PLAN.md         implementation plan the build followed
 ```
 
 ## Honest status
-Done and tested offline: everything in the table above. **Not done:** live Gemini validation, cloud deployment, native-speaker review of Hindi / Marathi strings, human verification of `docs/kyc_expected.csv`, slides and video (outline + script only), PAN + bill KYC path (shown as "coming soon"), voice (stretch). Every judgement call is listed in `docs/assumptions.md`.
+Done and tested offline: everything in the table above. **Not done:** cloud deployment of the live service, native-speaker review of Hindi / Marathi strings, human verification of `docs/kyc_expected.csv`, slides and video (outline + script only), PAN + bill KYC path (shown as "coming soon"), voice (stretch). Every judgement call is listed in `docs/assumptions.md`.
