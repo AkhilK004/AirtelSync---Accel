@@ -20,6 +20,7 @@ from app.engine.pricing import build_quote, initial_state, new_id
 from app.leads.service import create_lead
 from app.llm import get_llm
 from app.llm.prompts import NLG_SYSTEM, NLU_SYSTEM
+from app.llm import rules_nlu
 from app.llm.rules_nlu import parse as rule_parse
 from app.models.engine import Note, QuoteState
 from app.repo import get_repo
@@ -320,6 +321,8 @@ def handle_message(sess: AdvisorSession, text: str) -> AdvisorReply:
     chip = text.lower()
     update = _nlu(sess, text)
     # language: set from the first message, then switch only on a confident non-English detection or an explicit request
+    if update.language and update.language != "en" and sess.language_locked and update.language != sess.language and text.isascii() and not rules_nlu.detect_language(text):
+        update.language = None  # an English sentence with Indian nouns ("kirana store") is not a switch to Hindi, even if the LLM tags it so
     if update.language:
         explicit_en = update.language == "en" and re.search(r"in english|english (mein|me|madhe)", text.lower())
         if not sess.language_locked or (update.language != sess.language and (update.language != "en" or explicit_en)):
