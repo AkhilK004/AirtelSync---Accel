@@ -10,7 +10,7 @@ const p = await ctx.newPage();
 const errs = []; p.on("pageerror", e => errs.push("pageerror " + e.message)); p.on("console", m => { if (m.type() === "error") errs.push("console " + m.text()); });
 const shot = n => p.screenshot({ path: `/tmp/pw/${loc}-${n}.png` });
 await p.goto(`http://localhost:3000/${loc}?partner=ABC`); await shot("1-landing");
-await p.locator("a", { hasText: /./ }).filter({ has: p.locator("xpath=.") }).last().click();
+await p.locator("form button[type=submit]").click(); // landing: the single "find my plan" button
 await p.waitForURL(/advisor/); await p.getByText(loc === "hi" ? "बिज़नेस" : "business", {exact:false}).first().waitFor({ timeout: 15000 }); await shot("2-advisor-start");
 await p.fill("input[type=text], input:not([type])", msg); await p.keyboard.press("Enter");
 if (loc === "hi") { await p.waitForTimeout(1500); await p.fill("input:not([type])", "1"); await p.keyboard.press("Enter"); await p.waitForTimeout(1500); await p.fill("input:not([type])", "haan GST hai"); await p.keyboard.press("Enter"); }
@@ -18,7 +18,7 @@ await p.getByText(/₹/).first().waitFor({ timeout: 20000 }); await p.waitForTim
 const total1 = await p.getByText(/₹[0-9,.]+/).first().innerText();
 await p.locator("button").filter({ hasText: loc === "hi" ? "पूरी कीमत" : "See full price" }).last().click();
 await p.waitForURL(/quote\//); await p.waitForSelector("[role=switch]", { timeout: 15000 }); await shot("4-quote");
-const big = () => p.locator("h1 + div").innerText();
+const big = () => p.locator(".slip [aria-live=polite] .font-display").innerText();
 const before = await big();
 await p.locator("[role=switch]").first().click(); await p.waitForTimeout(1500); await shot("5-quote-toggled");
 const after = await big();

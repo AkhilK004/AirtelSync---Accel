@@ -7,9 +7,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-mukta, system-ui), var(--font-tiro, system-ui), system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
   --font-heading: var(--font-sans);
+  --font-display: var(--font-tiro, serif), var(--font-mukta, system-ui), serif;
+  --color-action: var(--action);
+  --color-action-foreground: var(--action-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,38 +54,43 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.48 0.2 268);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.6 0.15 268);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Udyam design tokens: Neel (indigo ink), Haldi (turmeric action), Chalk (page), Mehendi (success), Mirchi (error) */
+  --background: #f6f7fb;
+  --foreground: #1a1d2e;
+  --card: #ffffff;
+  --card-foreground: #1a1d2e;
+  --popover: #ffffff;
+  --popover-foreground: #1a1d2e;
+  --primary: #1b2a6b;
+  --primary-foreground: #ffffff;
+  --action: #f2b705;
+  --action-foreground: #1b2a6b;
+  --success: #2f6b4f;
+  --success-soft: #e4f1ea;
+  --secondary: #e9ecf5;
+  --secondary-foreground: #1b2a6b;
+  --muted: #eceef6;
+  --muted-foreground: #565b70;
+  --accent: #e9ecf5;
+  --accent-foreground: #1b2a6b;
+  --destructive: #b8281f;
+  --border: #d5d9e8;
+  --input: #7f87a6;
+  --ring: #1b2a6b;
+  --chart-1: #1b2a6b;
+  --chart-2: #f2b705;
+  --chart-3: #2f6b4f;
+  --chart-4: #b8281f;
+  --chart-5: #565b70;
+  --radius: 0.5rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1d2e;
+  --sidebar-primary: #1b2a6b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e9ecf5;
+  --sidebar-accent-foreground: #1b2a6b;
+  --sidebar-border: #d5d9e8;
+  --sidebar-ring: #1b2a6b;
 }
 
 .dark {
@@ -121,13 +131,91 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    font-family: var(--font-mukta, system-ui), var(--font-tiro, system-ui), system-ui, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
   body {
     @apply bg-background text-foreground;
+    font-size: 1rem;
+    line-height: 1.6;
   }
-  html {
-    @apply font-sans;
+  /* Devanagari needs more size and air than Latin to stay legible on a phone */
+  html[lang="hi"] body,
+  html[lang="mr"] body {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  :focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--background);
   }
 }
-body {
-  font-family: var(--font-geist-sans, system-ui), var(--font-deva, system-ui), system-ui, sans-serif;
+
+/* Bill slip: the quote looks like the printed bill a shop owner already trusts */
+.slip {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px 6px 0 0;
+  padding-bottom: 14px;
+}
+.slip::after {
+  content: "";
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  bottom: -9px;
+  height: 10px;
+  background:
+    linear-gradient(135deg, #fff 5px, transparent 0) 0 0 / 14px 10px repeat-x,
+    linear-gradient(225deg, #fff 5px, transparent 0) 0 0 / 14px 10px repeat-x;
+  filter: drop-shadow(0 1px 0 var(--border));
+}
+.slip-rule {
+  border: 0;
+  border-top: 2px dotted var(--input);
+  margin: 0;
+}
+.leader {
+  flex: 1;
+  min-width: 12px;
+  border-bottom: 2px dotted var(--input);
+  transform: translateY(-5px);
+}
+
+@keyframes stamp {
+  0% { transform: scale(1.04); background-color: color-mix(in srgb, var(--action) 45%, transparent); }
+  100% { transform: scale(1); background-color: transparent; }
+}
+@keyframes tick {
+  0% { background-color: color-mix(in srgb, var(--action) 55%, transparent); }
+  100% { background-color: transparent; }
+}
+.animate-stamp { animation: stamp 0.5s ease-out; }
+.animate-tick { animation: tick 0.7s ease-out; }
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+.typing-dot { animation: blink 1.2s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

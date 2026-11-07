@@ -23,7 +23,7 @@ async function run(name, viewport) {
   await p.screenshot({ path: `C:/tmp/pw/bo-${name}-2-drawer.png` });
   const reasons = await p.getByText("Why this score").count();
   await p.getByRole("button", { name: "Mark contacted" }).click(); await p.waitForTimeout(800);
-  const marked = await p.getByRole("button", { name: "Mark contacted" }).evaluate((e) => e.className.includes("bg-primary"));
+  const marked = await p.getByRole("button", { name: "Mark contacted" }).evaluate((e) => e.className.includes("bg-action"));
   const overflow = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   console.log(JSON.stringify({ name, denied, rows, topScores: scores.slice(0, 4), fieldRows: field, drawerShowsReasons: reasons > 0, statusMarked: marked, pageOverflow: overflow }));
   await ctx.close();

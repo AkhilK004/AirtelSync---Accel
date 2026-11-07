@@ -157,7 +157,23 @@ export function KycFlow({ orderId }: { orderId: string }) {
       {step === "consent" && (
         <section className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">{notice.title}</h2>
-          <ul className="flex list-disc flex-col gap-1.5 pl-5 text-sm">{notice.summary.map((s) => <li key={s}>{s}</li>)}</ul>
+          <dl className="flex flex-col gap-3 rounded-lg border bg-card p-4">
+            {notice.summary.map((s) => {
+              const i = s.indexOf(":"); // each line reads "Label: text"; show the label as a heading so the notice can be skimmed
+              return (
+                <div key={s}>
+                  {i > 0 && i < 40 ? (
+                    <>
+                      <dt className="font-semibold text-primary">{s.slice(0, i)}</dt>
+                      <dd className="text-[0.95rem]">{s.slice(i + 1).trim()}</dd>
+                    </>
+                  ) : (
+                    <dd className="text-[0.95rem]">{s}</dd>
+                  )}
+                </div>
+              );
+            })}
+          </dl>
           <button className="flex items-center gap-1 text-sm text-primary underline underline-offset-2" onClick={() => setShowFull(!showFull)} aria-expanded={showFull}>
             {t("readFull")} <ChevronDown className={`size-4 transition-transform ${showFull ? "rotate-180" : ""}`} />
           </button>
@@ -174,7 +190,7 @@ export function KycFlow({ orderId }: { orderId: string }) {
             ))}
           </div>
           <p className="text-xs text-muted-foreground">{t("version")}: {notice.version}</p>
-          {!requiredOk && <p className="text-xs text-muted-foreground">{t("mustTick")}</p>}
+          {!requiredOk && <p className="rounded-md border border-action bg-action/15 px-3 py-2 text-sm" role="status">{t("mustTick")}</p>}
           <FixedBar><Button className="h-12 w-full text-base" disabled={!requiredOk || busy} onClick={agree}>{t("agree")}</Button></FixedBar>
         </section>
       )}

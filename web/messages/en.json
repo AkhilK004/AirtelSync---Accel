@@ -7,7 +7,10 @@
     "loading": "Loading…",
     "retry": "Try again",
     "error": "Something went wrong. Please try again.",
-    "demo": "Demo prototype · all data is synthetic"
+    "demo": "Demo prototype · all data is synthetic",
+    "skip": "Skip to main content",
+    "largerText": "Larger text",
+    "normalText": "Normal text"
   },
   "landing": {
     "title": "Get your business online in 10 minutes",
@@ -16,7 +19,14 @@
     "b2": "One monthly price. Add or remove extras anytime",
     "b3": "Documents checked in minutes, track your order on your phone",
     "cta": "Find my plan",
-    "chooseLanguage": "Choose your language"
+    "chooseLanguage": "Choose your language",
+    "askLabel": "Tell us about your business",
+    "askPlaceholder": "For example: kirana store in Jaipur, 2 staff",
+    "ex1": "Kirana store, Jaipur, 2 staff",
+    "ex2": "Clinic in Mumbai, 6 staff, GST yes",
+    "ex3": "Salon in Pune, 3 staff",
+    "stepByStep": "Or answer one question at a time",
+    "trust": "Prices come from our catalogue. Documents are checked in minutes."
   },
   "advisor": {
     "title": "Plan advisor",
@@ -38,7 +48,12 @@
     "anytime": "Anytime",
     "submit": "Request call",
     "thanks": "Thank you! We will call you within {hours} hours.",
-    "startError": "Could not start the advisor. Please try again."
+    "startError": "Could not start the advisor. Please try again.",
+    "details": "Show details",
+    "hideDetails": "Hide details",
+    "typing": "Advisor is typing",
+    "answered": "{asked} of {total} answered",
+    "heading": "Find your plan"
   },
   "quote": {
     "title": "Your plan",

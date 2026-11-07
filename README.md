@@ -44,6 +44,9 @@ flowchart LR
 | D8 One-page privacy and security note | `docs/privacy_note.md` |
 | S1 / S2 Back-office and propensity score | `/backoffice`, `api/app/leads`, `docs/model_card.md` |
 
+## Design
+The interface is built around a shop-counter idea (indigo ink, turmeric action, a printed bill-slip quote, Mukta and a print serif for Devanagari). Details, tokens and the accessibility audit (axe-core, 0 violations on 6 screens in 3 languages): [`docs/ui_design.md`](docs/ui_design.md).
+
 ## Architecture
 
 ```mermaid
