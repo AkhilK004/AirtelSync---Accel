@@ -1,0 +1,63 @@
+flowchart LR
+  subgraph Phone["Owner's phone (PWA-style web, hi / en / mr)"]
+    UI["Next.js app<br/>advisor chat · quote · checkout<br/>consent + KYC · tracker"]
+  end
+  subgraph BO["Back-office (English)"]
+    BOUI["Ranked leads · funnel panel<br/>Basic auth"]
+  end
+
+  subgraph Run["Cloud Run · asia-south1 · FastAPI (single instance)"]
+    direction TB
+    ADV["Advisor<br/>deterministic dialogue policy<br/>NLU / NLG calls only"]
+    ENG["Rules engine<br/>segments · eligibility · dependencies<br/>integer-paise pricing"]
+    QUO["Quote + checkout<br/>add-on toggles · mock OTP"]
+    CON["Consent ledger<br/>append-only · versioned notice"]
+    KYC["Smart KYC<br/>extraction · validators · decision<br/>mock GSTIN / Udyam lookups"]
+    ORD["Orders + tracker<br/>state machine · per-line fulfilment<br/>simulated WhatsApp / SMS"]
+    LEAD["Leads + propensity<br/>scoring · routing · funnel events"]
+  end
+
+  subgraph GCP["Google Cloud · asia-south1 (Mumbai)"]
+    GEM["Gemini 3.5 Flash<br/>Vertex AI<br/>(text + vision, structured output)"]
+    FS[("Firestore<br/>sessions · quotes · orders<br/>consents · leads · events · audit")]
+    GCS[("GCS review bucket<br/>1-day lifecycle delete<br/>manual-review images only")]
+  end
+
+  UI -->|HTTPS JSON| ADV
+  UI --> QUO
+  UI --> CON
+  UI -->|multipart upload| KYC
+  UI -->|poll 5 s| ORD
+  BOUI -->|Basic auth| LEAD
+
+  ADV -->|slots in / facts out| GEM
+  ADV --> ENG
+  QUO --> ENG
+  KYC -->|image in / fields out| GEM
+  KYC --> CON
+  KYC --> ORD
+  QUO --> ORD
+  LEAD --> ENG
+  ADV --> LEAD
+  KYC --> LEAD
+
+  ADV & QUO & CON & KYC & ORD & LEAD --> FS
+  KYC -->|review only| GCS
+
+  subgraph Prod["Production path (not built)"]
+    direction TB
+    P1["Real GSTN / Udyam APIs"]:::dashed
+    P2["DigiLocker + e-sign"]:::dashed
+    P3["WhatsApp Business API"]:::dashed
+    P4["Pub/Sub order events → BigQuery funnel"]:::dashed
+    P5["Provisioning / OSS-BSS"]:::dashed
+    P6["Partner app + consent manager"]:::dashed
+  end
+  KYC -.-> P1
+  KYC -.-> P2
+  ORD -.-> P3
+  ORD -.-> P5
+  LEAD -.-> P4
+  LEAD -.-> P6
+
+  classDef dashed stroke-dasharray: 5 5,fill:#f6f6f6,color:#555

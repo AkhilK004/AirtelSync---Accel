@@ -31,3 +31,16 @@ bar(ch, "6-month churn by customer's prior internet", "churn_by_prior_internet.p
 calls = A.groupby(pd.cut(A.customer_follow_up_calls, [-1, 1, 3, 5, 20], labels=["0-1", "2-3", "4-5", "6+"]), observed=True).churned_within_6_months.mean()
 bar(calls, "6-month churn vs status-chase calls", "churn_by_followup_calls.png", h=2.8)
 print(sorted(p.name for p in OUT.iterdir()))
+
+# --- Phase 9 slide chart: acquisition cost vs monthly value by segment
+seg = L.groupby("segment").agg(cost=("acquisition_cost_inr", "sum"), n=("activated", "sum"))
+cpa = seg.cost / seg.n
+val = A.groupby("segment").monthly_bundle_value_inr.median()
+fig, ax = plt.subplots(figsize=(7.5, 3.8)); x = range(len(seg)); w = 0.38
+ax.bar([i - w/2 for i in x], cpa.values, w, color=C2, label="Cost per activation (Rs)")
+ax.bar([i + w/2 for i in x], val.reindex(seg.index).values, w, color=C1, label="Median monthly bundle value (Rs)")
+ax.set_xticks(list(x)); ax.set_xticklabels([s.replace(" & ", " &\n").replace("Small ", "Small\n") for s in seg.index], fontsize=8)
+for i, (a_, b_) in enumerate(zip(cpa.values, val.reindex(seg.index).values)):
+    ax.text(i - w/2, a_, f"{a_/1000:.1f}k", ha="center", va="bottom", fontsize=8); ax.text(i + w/2, b_, f"{b_/1000:.1f}k", ha="center", va="bottom", fontsize=8)
+ax.legend(fontsize=8); ax.set_title("Micro retail costs 8x its monthly value to win; multi-site pays back in under a month")
+save("segment_economics.png")

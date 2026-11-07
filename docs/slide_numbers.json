@@ -1,0 +1,145 @@
+{
+ "segments": [
+  {
+   "segment": "Micro retail & services",
+   "leads": 2709,
+   "activated": 110,
+   "act_rate_pct": 4.1,
+   "cost_per_activation": 20007.0,
+   "median_monthly_value": 2470.0,
+   "median_setup": 1800.0,
+   "churn_pct": 22.7,
+   "payback_months_revenue": 8.1
+  },
+  {
+   "segment": "Professional offices",
+   "leads": 1247,
+   "activated": 138,
+   "act_rate_pct": 11.1,
+   "cost_per_activation": 10695.0,
+   "median_monthly_value": 6575.0,
+   "median_setup": 0.0,
+   "churn_pct": 13.8,
+   "payback_months_revenue": 1.6
+  },
+  {
+   "segment": "Small manufacturers",
+   "leads": 289,
+   "activated": 37,
+   "act_rate_pct": 12.8,
+   "cost_per_activation": 15324.0,
+   "median_monthly_value": 15910.0,
+   "median_setup": 15400.0,
+   "churn_pct": 8.1,
+   "payback_months_revenue": 1.0
+  },
+  {
+   "segment": "Small multi-site businesses",
+   "leads": 755,
+   "activated": 83,
+   "act_rate_pct": 11.0,
+   "cost_per_activation": 15614.0,
+   "median_monthly_value": 28080.0,
+   "median_setup": 37800.0,
+   "churn_pct": 10.8,
+   "payback_months_revenue": 0.6
+  }
+ ],
+ "sources": [
+  {
+   "lead_source": "Channel partner",
+   "leads": 1010,
+   "activated": 81,
+   "cost_per_activation": 20851.0,
+   "act_rate_pct": 8.0
+  },
+  {
+   "lead_source": "Field sales",
+   "leads": 1720,
+   "activated": 125,
+   "cost_per_activation": 24335.0,
+   "act_rate_pct": 7.3
+  },
+  {
+   "lead_source": "Inbound call",
+   "leads": 504,
+   "activated": 48,
+   "cost_per_activation": 5113.0,
+   "act_rate_pct": 9.5
+  },
+  {
+   "lead_source": "Referral",
+   "leads": 413,
+   "activated": 61,
+   "cost_per_activation": 4099.0,
+   "act_rate_pct": 14.8
+  },
+  {
+   "lead_source": "Website form",
+   "leads": 995,
+   "activated": 43,
+   "cost_per_activation": 6352.0,
+   "act_rate_pct": 4.3
+  },
+  {
+   "lead_source": "WhatsApp campaign",
+   "leads": 358,
+   "activated": 10,
+   "cost_per_activation": 4026.0,
+   "act_rate_pct": 2.8
+  }
+ ],
+ "blended": {
+  "cac": 15053,
+  "median_value": 6900.0,
+  "avg_days": 17.6,
+  "calls": 3.01
+ },
+ "bundles": {
+  "Dukaan Starter (kirana, 2 staff, tier 2)": {
+   "monthly_ex_gst": "₹1,448",
+   "monthly_incl_gst": "₹1,708.64",
+   "setup_incl_gst": "₹0",
+   "contract_months": 12,
+   "lines": [
+    "Biz Fibre 100 x1",
+    "Business Postpaid 299 x1"
+   ]
+  },
+  "Pro Office (clinic, 6 staff, tier 1)": {
+   "monthly_ex_gst": "₹3,369",
+   "monthly_incl_gst": "₹3,975.42",
+   "setup_incl_gst": "₹0",
+   "contract_months": 12,
+   "lines": [
+    "Biz Fibre 100 x1",
+    "Business Postpaid 299 x2",
+    "Cloud Email & Office Suite x6",
+    "Endpoint Security x6"
+   ]
+  },
+  "Multi-Site Connect (4 restaurants, 40 staff)": {
+   "monthly_ex_gst": "₹9,388",
+   "monthly_incl_gst": "₹11,077.84",
+   "setup_incl_gst": "₹7,080",
+   "contract_months": 12,
+   "lines": [
+    "Biz Fibre 100 x4",
+    "Business Postpaid 599 x4",
+    "Backup 4G/5G Failover x4"
+   ]
+  },
+  "Factory Connect (auto parts, 80 staff)": {
+   "monthly_ex_gst": "₹41,880",
+   "monthly_incl_gst": "₹49,418.40",
+   "setup_incl_gst": "₹17,700",
+   "contract_months": 24,
+   "lines": [
+    "Internet Leased Line 100 x1",
+    "Business Postpaid 599 x8",
+    "Cloud Email & Office Suite x24",
+    "Endpoint Security x24"
+   ]
+  }
+ }
+}
