@@ -7,7 +7,7 @@ from app.repo import get_repo
 
 EVENT_NAMES = {"advisor_started", "slot_filled", "recommendation_shown", "quote_viewed", "addon_toggled", "quote_accepted",
                "checkout_completed", "consent_given", "kyc_doc_uploaded", "kyc_decided", "order_state_changed",
-               "tracker_viewed", "handoff_requested"}
+               "tracker_viewed", "handoff_requested", "quote_shared"}
 
 
 _SEEDING = False  # set by app/seed.py so demo events are flagged (props.seed) and the funnel panel can say so

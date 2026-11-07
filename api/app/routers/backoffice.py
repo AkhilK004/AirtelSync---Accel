@@ -51,6 +51,14 @@ def set_status(lead_id: str, body: StatusBody, user: Annotated[str, Depends(auth
     return service.set_status(lead_id, body.status, user)
 
 
+@router.get("/engagement")
+def engagement_table():
+    """Advisor-era training table for the next propensity retrain (counts only, no PII) and whether there is enough data yet (A66)."""
+    from app.leads import engagement
+    rows = engagement.journey_rows()
+    return {"readiness": engagement.readiness(rows), "features": engagement.ENGAGEMENT_FEATURES, "rows": rows}
+
+
 @router.get("/funnel")
 def funnel():
     return compute()

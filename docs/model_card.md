@@ -68,5 +68,8 @@ Back-office leads sit at a funnel stage, so there is one model per stage reached
 - **Fairness.** Language is excluded. City tier stays in because it maps to product availability (catalogue eligibility), not to a person.
 - **Ceiling.** An AUC around 0.72 is close to what this noisy synthetic outcome allows. Much higher numbers on this data usually mean leaked columns.
 
+## Next model: advisor-era engagement (A66)
+The CSV has no behaviour signals, so ~0.72 is its ceiling. The live system now logs counts per advisor journey: messages, questions asked, assumed answers, budget stated and budget gap, quote views, add-on toggles, WhatsApp shares, handoff requests, tracker views, KYC uploads and failures. `GET /backoffice/engagement` returns one row per journey (the 8 model inputs, these counts and the outcome) plus a `readiness` flag: **retrain once there are at least 300 journeys with at least 30 activations**. Until then these signals are shown in the lead drawer but do not change the score. The demo seed carries none of them (its leads come from the CSV).
+
 ## Production path (not built, PLAN rule 6)
 Weekly drift check on input distributions (population stability index per feature; alert above 0.2). Monthly retrain on a time split. A challenger is promoted only if it passes every gate above and beats the champion on paired folds. Version and training time are already exposed on `/health`.

@@ -13,7 +13,7 @@
 
 **Consent design.** Shown in the owner's language (hi / en / mr) before any document is touched: who we are, what, why, how long, rights, grievance contact, in under 120 words, with the full notice one tap away. Grants and withdrawals are an append-only ledger (notice version, language, timestamp, channel, salted-hash principal). Withdrawing is as easy as giving; withdrawing KYC consent blocks the KYC endpoints.
 
-**Data minimisation.** Registry lookup first (GSTIN / Udyam prefill), then only the documents that path needs. Photos are read in memory and discarded; only a manual-review case stores images, in a bucket that **deletes them after 1 day**. Aadhaar, if uploaded, is masked to the last 4 digits immediately. The order keeps the phone's last 4 digits and a salted hash, not the number. Back-office shows phones masked. The tracker needs the last 4 digits of the phone.
+**Data minimisation.** Registry lookup first (GSTIN / Udyam prefill), then only the documents that path needs. Photos are read in memory and discarded; only a manual-review case stores images, in a bucket that **deletes them after 1 day**. Aadhaar, if uploaded, is masked to the last 4 digits immediately. The order keeps the phone's last 4 digits and a salted hash, not the number. Back-office shows phones masked. Lead scoring logs only behaviour counts (messages, quote views, add-on toggles), never message text, and uses them for service-delivery prioritisation. The tracker needs the last 4 digits of the phone.
 
 **Localisation.** Storage (Firestore), review bucket, Cloud Run and the Gemini model all run in GCP Mumbai (`asia-south1`).
 

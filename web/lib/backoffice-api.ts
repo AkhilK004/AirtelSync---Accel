@@ -9,6 +9,7 @@ export type LeadDetail = Lead & {
   profile: Record<string, unknown>; phone_masked: string | null; preferred_time: string | null;
   quote: { bundle: string; monthly_total_display: string; one_time_total_display: string; lines: { name: string; qty: number; monthly: string }[]; assumptions: string[]; assisted: boolean } | null;
   order: { state: string; business_name: string | null } | null;
+  engagement: Record<string, number | boolean> | null;
   kyc: { decision: { status: string; message: string; reason_codes: string[] } | null; issues: { code: string; status: string; label: string; message: string; fix: string | null }[] } | null;
 };
 export type Funnel = {

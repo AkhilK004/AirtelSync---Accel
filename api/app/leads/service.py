@@ -14,7 +14,7 @@ from app.data.loaders import get_data
 from app.engine.money import fmt_inr
 from app.engine.pricing import build_quote, new_id
 from app.errors import ApiError
-from app.leads import scoring
+from app.leads import engagement, scoring
 from app.models.engine import QuoteState
 from app.repo import get_repo
 
@@ -225,7 +225,7 @@ def detail(lead_id: str) -> dict:
     l = _enrich(l)
     repo = get_repo()
     out = row(l) | {"profile": _profile_view(l), "phone_masked": ("•" * 6 + l["phone"][-4:]) if l.get("phone") else None,
-                    "preferred_time": l.get("preferred_time"), "kyc": None, "quote": None, "order": None}
+                    "preferred_time": l.get("preferred_time"), "engagement": engagement.for_lead(l), "kyc": None, "quote": None, "order": None}
     qd = repo.get("quotes", l["quote_id"]) if l.get("quote_id") else None
     if qd:
         q = build_quote(QuoteState.model_validate(qd), "en")

@@ -94,7 +94,8 @@ export type Quote = {
   one_time_paise: number; one_time_display: string; one_time_gst_display: string; one_time_total_display: string;
   contract_months: number; gst_rate_pct: number; assumptions: Note[]; assisted: boolean;
 };
-export const getQuote = (id: string, lang: string) => req<Quote>(`/quotes/${id}?lang=${lang}`);
+export const getQuote = (id: string, lang: string, view = false) => req<Quote>(`/quotes/${id}?lang=${lang}&view=${view}`);
+export const quoteShared = (id: string) => fetch(`${API_URL}/quotes/${id}/shared`, { method: "POST", keepalive: true }).catch(() => undefined);
 export const toggleAddon = (id: string, sku: string, on: boolean, lang: string) =>
   post<{ quote: Quote; notices: Note[] }>(`/quotes/${id}/toggle?lang=${lang}`, { sku, on });
 

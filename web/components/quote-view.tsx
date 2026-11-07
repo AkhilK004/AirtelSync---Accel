@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
-import { type Quote, getQuote, toggleAddon } from "@/lib/api";
+import { type Quote, getQuote, quoteShared, toggleAddon } from "@/lib/api";
 import { useApiError } from "@/lib/use-api-error";
 
 export function QuoteView({ quoteId }: { quoteId: string }) {
@@ -22,11 +22,11 @@ export function QuoteView({ quoteId }: { quoteId: string }) {
   const [pending, setPending] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
-  const load = useCallback(() => {
-    getQuote(quoteId, locale).then(setQ).catch(() => setFailed(true));
+  const load = useCallback((view = false) => {
+    getQuote(quoteId, locale, view).then(setQ).catch(() => setFailed(true));
   }, [quoteId, locale]);
   useEffect(() => {
-    load();
+    load(true); // the first load of the page counts as a quote view; refetches after a toggle do not
   }, [load]);
 
   async function onToggle(sku: string, on: boolean) {
@@ -150,7 +150,7 @@ export function QuoteView({ quoteId }: { quoteId: string }) {
         )}
       </section>
 
-      <a href={shareHref} target="_blank" rel="noopener noreferrer" className={`${buttonVariants({ variant: "outline" })} h-11 gap-2 text-base`}>
+      <a href={shareHref} onClick={() => quoteShared(quoteId)} target="_blank" rel="noopener noreferrer" className={`${buttonVariants({ variant: "outline" })} h-11 gap-2 text-base`}>
         <Share2 /> {t("share")}
       </a>
 

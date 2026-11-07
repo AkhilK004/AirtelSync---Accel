@@ -236,6 +236,12 @@ function LeadSheet({ auth, id, onClose, onChanged }: { auth: string; id: string 
               <div className="text-sm font-medium">Why this score ({cur.score != null ? `${(cur.score * 100).toFixed(1)}%` : "—"})</div>
               <div className="mt-1 flex flex-wrap gap-1.5">{cur.score_reasons.map((r) => <Badge key={r} variant={r.endsWith("↑") ? "secondary" : "outline"}>{r}</Badge>)}</div>
             </div>
+            {cur.engagement ? (
+              <div className="text-sm" data-engagement>
+                <span className="font-medium">Engagement:</span> {cur.engagement.advisor_messages} messages · quote viewed {cur.engagement.quote_views}x · {cur.engagement.addon_toggles} add-on toggles
+                {cur.engagement.quote_shared ? " · shared on WhatsApp" : ""}{Number(cur.engagement.budget_gap_inr) > 0 ? ` · ₹${cur.engagement.budget_gap_inr} over budget` : ""} · {cur.engagement.assumptions_used} assumed answers
+              </div>
+            ) : null}
             {cur.next_action ? <div className="rounded-lg border border-primary/40 p-2 text-sm" data-next-action={cur.next_action.code}><span className="font-medium">Next step:</span> {cur.next_action.text}</div> : null}
             {cur.compliance_hold ? (
               <div className="rounded-lg border border-destructive/40 p-2 text-sm"><span className="font-medium">Compliance hold:</span> {HOLD_LABEL[cur.compliance_hold] ?? cur.compliance_hold}</div>
