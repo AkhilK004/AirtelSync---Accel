@@ -18,6 +18,7 @@ const DEMO_TOKEN = process.env.NEXT_PUBLIC_DEMO_ADMIN_TOKEN ?? "";
 const SEGMENTS = [["micro_retail", "Micro retail"], ["professional_office", "Professional office"], ["multi_site", "Multi-site"], ["manufacturer", "Manufacturer"]];
 const STAGES = ["advisor", "quote", "checkout", "kyc", "order"];
 const ROUTES = [["field_sales", "Field sales"], ["partner", "Partner"], ["telesales", "Telesales"], ["compliance", "Compliance hold"]];
+const ACTION_LABEL: Record<string, string> = { kyc_assist_udyam: "KYC assist: Udyam path", restore_gstin: "Restore GSTIN" };
 const HOLD_LABEL: Record<string, string> = { gstin_cancelled: "GSTIN cancelled", gstin_suspended: "GSTIN suspended", gstin_inactive: "GSTIN not active" };
 const STATUSES = ["new", "contacted", "won", "lost"];
 const REASON_LABEL: Record<string, string> = {
@@ -137,7 +138,7 @@ function Dashboard({ auth, onSignOut }: { auth: string; onSignOut: () => void })
                     </div>
                   </TableCell>
                   <TableCell className="tabular-nums">{l.compliance_hold ? <Badge variant="destructive">{HOLD_LABEL[l.compliance_hold] ?? l.compliance_hold}</Badge> : l.expected_value_display}</TableCell>
-                  <TableCell><div className="font-medium">{l.name}</div><div className="text-xs text-muted-foreground">{label(SEGMENTS, l.segment)}{l.city ? ` · ${l.city}` : ""}</div></TableCell>
+                  <TableCell><div className="font-medium">{l.name}</div><div className="text-xs text-muted-foreground">{label(SEGMENTS, l.segment)}{l.city ? ` · ${l.city}` : ""}</div>{l.next_action ? <Badge variant="outline" className="mt-1" title={l.next_action.text}>{ACTION_LABEL[l.next_action.code] ?? l.next_action.code}</Badge> : null}</TableCell>
                   <TableCell className="capitalize">{l.stage}</TableCell>
                   <TableCell>{REASON_LABEL[l.reason] ?? l.reason}</TableCell>
                   <TableCell>{label(ROUTES, l.route)}{l.partner_code ? <div className="text-xs text-muted-foreground">{l.partner_code}</div> : null}</TableCell>
@@ -235,8 +236,9 @@ function LeadSheet({ auth, id, onClose, onChanged }: { auth: string; id: string 
               <div className="text-sm font-medium">Why this score ({cur.score != null ? `${(cur.score * 100).toFixed(1)}%` : "—"})</div>
               <div className="mt-1 flex flex-wrap gap-1.5">{cur.score_reasons.map((r) => <Badge key={r} variant={r.endsWith("↑") ? "secondary" : "outline"}>{r}</Badge>)}</div>
             </div>
+            {cur.next_action ? <div className="rounded-lg border border-primary/40 p-2 text-sm" data-next-action={cur.next_action.code}><span className="font-medium">Next step:</span> {cur.next_action.text}</div> : null}
             {cur.compliance_hold ? (
-              <div className="rounded-lg border border-destructive/40 p-2 text-sm"><span className="font-medium">Compliance hold:</span> {HOLD_LABEL[cur.compliance_hold] ?? cur.compliance_hold}. GST-only products cannot be sold until the GSTIN is active again; help the owner restore it or use the Udyam path.</div>
+              <div className="rounded-lg border border-destructive/40 p-2 text-sm"><span className="font-medium">Compliance hold:</span> {HOLD_LABEL[cur.compliance_hold] ?? cur.compliance_hold}</div>
             ) : (
               <div className="text-sm"><span className="font-medium">Expected value:</span> {cur.expected_value_display} / month (chance of activating x typical bundle value for the segment)</div>
             )}

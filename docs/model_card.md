@@ -36,6 +36,18 @@ One-hot (categories with < 20 rows pooled) + standardised numerics -> `LogisticR
 | Learning curve 1k / 2k / 3k / 4k rows | 0.696 / 0.709 / 0.715 / 0.720 | non-decreasing (no under-fitting) |
 | vs previous v1 (paired folds) | +0.031 AUC, better on 96% of folds; June +0.034 [+0.008, +0.060] | better on ≥ 80% of folds |
 
+## Gain chart (what a call centre plans with)
+Calling leads in score order, out-of-fold over 5x5 CV (random calls hit 7.4 activations per 100 calls):
+
+| Call the | Share of all activations captured | Activations per 100 calls | vs random | June holdout share |
+|---|---|---|---|---|
+| Top 10% (100 calls per 1,000 leads) | 24% | 17.6 | 2.39x | 22% |
+| Top 20% (200 calls per 1,000 leads) | 44% | 16.3 | 2.21x | 45% |
+| Top 30% (300 calls per 1,000 leads) | 58% | 14.3 | 1.94x | 56% |
+| Top 50% (500 calls per 1,000 leads) | 81% | 12.0 | 1.62x | 83% |
+
+Gated in `test_propensity.py`: each cut beats random by more than 1.2x and the top 30% captures at least 55%.
+
 ## Stage-aware scoring (v3)
 Back-office leads sit at a funnel stage, so there is one model per stage reached (Contacted, Needs assessed, Quote accepted, KYC complete; same 8 inputs, no class weights). Ranking inside a stage is unchanged; calibration is what improves, so expected values compare across stages (A64).
 
@@ -51,6 +63,7 @@ Back-office leads sit at a funnel stage, so there is one model per stage reached
 ## Known limits and how they are handled
 - **The model learned the old sales process.** Lead source is its strongest input (WhatsApp ↓, referral ↑), and the advisor is meant to fix exactly the WhatsApp leak. Scores are therefore compared **within** a routing queue, and the model must be retrained on advisor-era leads.
 - **Compliance.** A Cancelled / Suspended GSTIN converted as often as an active one in the data. A business rule overrides the model: those leads go to a compliance hold with expected value 0 (A61).
+- **Action, not just a score.** After quote acceptance 16% of GSTIN-less leads activate vs 50% with a GSTIN, so a score alone cannot fix them. Those leads carry a `next_action` (KYC assist on the Udyam path; restore GSTIN for a Cancelled/Suspended one) in the back-office (A65).
 - **Value, not just probability.** The back-office ranks by P(activate) x the segment's median monthly bundle value (A62).
 - **Fairness.** Language is excluded. City tier stays in because it maps to product availability (catalogue eligibility), not to a person.
 - **Ceiling.** An AUC around 0.72 is close to what this noisy synthetic outcome allows. Much higher numbers on this data usually mean leaked columns.

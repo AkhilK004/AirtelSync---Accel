@@ -100,6 +100,33 @@ def test_leads_are_scored_with_their_stage_model(seeded):
     assert max(by["order"]) > 0.3
 
 
+def test_next_action_kyc_assist_for_gstinless_after_quote(seeded):
+    """A65: no GSTIN after quote acceptance -> concrete Udyam-path task; compliance hold -> restore GSTIN; others none."""
+    rows = L()
+    by_code = {}
+    for r in rows:
+        by_code.setdefault((r["next_action"] or {}).get("code"), []).append(r)
+    for r in by_code.get("kyc_assist_udyam", []):
+        assert r["stage"] in ("kyc", "order") and not r["compliance_hold"]
+        d = c.get(f"/backoffice/leads/{r['id']}", headers=AUTH).json()
+        assert d["profile"].get("has_gstin") is not True and "Udyam" in d["next_action"]["text"] and "%" in d["next_action"]["text"]
+    assert all(r["compliance_hold"] for r in by_code.get("restore_gstin", []))
+    for r in rows:
+        if r["stage"] in ("advisor", "quote") and not r["compliance_hold"]:
+            assert r["next_action"] is None
+
+
+def test_next_action_rules_unit():
+    w, wo = leads._quote_accepted_rates()
+    assert wo < 0.25 < 0.4 < w                                     # finding 1: ~16% vs ~50% after quote acceptance
+    base = {"id": "x", "stage_reached": "kyc", "raw_features": {"has_gstin": False}}
+    a = leads.next_action(base)
+    assert a["code"] == "kyc_assist_udyam" and f"{wo:.0%}" in a["text"]
+    assert leads.next_action({**base, "raw_features": {"has_gstin": True}}) is None
+    assert leads.next_action({**base, "stage_reached": "quote"}) is None
+    assert leads.next_action({**base, "compliance_hold": "gstin_cancelled"})["code"] == "restore_gstin"
+
+
 def test_compliance_hold_overrides_the_model():
     """A61: Cancelled/Suspended GSTIN -> compliance desk, expected value 0, whatever the score."""
     from app.data.loaders import get_data

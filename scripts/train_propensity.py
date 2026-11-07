@@ -79,10 +79,12 @@ make_v1 = lambda: Pipeline([("pre", ColumnTransformer([("cat", OneHotEncoder(han
 # ---------------------------------------------------------------- 1+2. nested repeated CV, paired vs v1
 outer = RepeatedStratifiedKFold(n_splits=5, n_repeats=5, random_state=SEED)
 rows, chosen_C = [], []
+oof_sum, oof_n = np.zeros(len(y)), np.zeros(len(y))   # out-of-fold predictions averaged over repeats -> gain chart
 for tr, te in outer.split(X, y):
     g = tuned().fit(X.iloc[tr], y[tr]); chosen_C.append(g.best_params_["clf__C"])
     p, pt = g.predict_proba(X.iloc[te])[:, 1], g.predict_proba(X.iloc[tr])[:, 1]
     p1 = make_v1().fit(X_v1.iloc[tr], y[tr]).predict_proba(X_v1.iloc[te])[:, 1]
+    oof_sum[te] += p; oof_n[te] += 1
     rows.append({"auc": roc_auc_score(y[te], p), "train_auc": roc_auc_score(y[tr], pt), "pr_auc": average_precision_score(y[te], p),
                  "lift": lift(y[te], p), "auc_v1": roc_auc_score(y[te], p1)})
 R = pd.DataFrame(rows)
@@ -92,6 +94,20 @@ cv = {"folds": len(R), "auc_mean": round(R.auc.mean(), 4), "auc_sd": round(R.auc
       "base_rate": round(float(y.mean()), 4), "chosen_C_counts": {str(c): chosen_C.count(c) for c in sorted(set(chosen_C))}}
 paired = {"v1_auc_mean": round(R.auc_v1.mean(), 4), "delta_auc_mean": round(d.mean(), 4), "delta_auc_sd": round(d.std(), 4),
           "share_folds_v2_better": round(float((d > 0).mean()), 3)}
+
+
+
+def gains(yt, p, queue_sizes=(0.1, 0.2, 0.3, 0.5)):
+    """Call-centre view: calling the top q of leads captures what share of all activations, and how many activations per 100 calls."""
+    o = np.argsort(-p); out = {}
+    for q in queue_sizes:
+        k = max(1, int(len(p) * q)); hit = float(yt[o[:k]].sum())
+        out[f"top_{int(q * 100)}pct"] = {"calls_per_1000_leads": k * 1000 // len(p), "share_of_activations": round(hit / yt.sum(), 3),
+                                          "activations_per_100_calls": round(100 * hit / k, 1), "lift_vs_random_calls": round((hit / k) / yt.mean(), 2)}
+    return out
+
+
+gains_cv = gains(y, oof_sum / oof_n)
 
 # HGB comparison (record only; the shipped model stays linear for explainable reasons)
 hgb = [roc_auc_score(y[te], make(kind="hgb").fit(X.iloc[tr], y[tr]).predict_proba(X.iloc[te])[:, 1])
@@ -117,6 +133,8 @@ time_holdout = {"n_train": int(train_t.sum()), "n_test": int((~train_t).sum()), 
                 "brier": round(brier_score_loss(yt, p_t), 4), "brier_base_rate_only": round(brier_score_loss(yt, np.full(len(yt), pi_t)), 4),
                 "log_loss": round(log_loss(yt, p_t), 4), "ece_decile": round(ece(yt, p_t), 4),
                 "calibration_quintiles": cal.groupby("bin", observed=True).agg(pred_mean=("p", "mean"), actual=("y", "mean")).round(3).reset_index(drop=True).to_dict("records")}
+
+time_holdout["gains"] = gains(yt, p_t)
 
 # ---------------------------------------------------------------- 4. sanity: shuffled labels, learning curve
 ys = np.random.default_rng(SEED).permutation(y)
@@ -157,7 +175,7 @@ for k, name in STAGES.items():
 g_all = tuned().fit(X, y); C_final = g_all.best_params_["clf__C"]
 final = g_all.best_estimator_
 metrics = {"model_version": MODEL_VERSION, "features": FEATURES, "C_final": C_final, "nested_cv": cv, "paired_vs_v1": paired,
-           "hgb_cv_auc_mean": round(float(np.mean(hgb)), 4), "stage_models": stage_metrics, "time_holdout": time_holdout, "shuffled_label_auc": shuffled_auc, "learning_curve": curve,
+           "hgb_cv_auc_mean": round(float(np.mean(hgb)), 4), "stage_models": stage_metrics, "gains_cv_oof": gains_cv, "time_holdout": time_holdout, "shuffled_label_auc": shuffled_auc, "learning_curve": curve,
            "calibration_method": "class_weight=balanced + analytic prior shift to the training base rate"}
 trained_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
 joblib.dump({"pipeline": final, "features": FEATURES, "metrics": metrics, "prior": float(y.mean()), "model_version": MODEL_VERSION,
@@ -167,6 +185,8 @@ json.dump({"model_version": MODEL_VERSION, "categorical": CATEGORICAL, "numeric"
           open(OUT / "feature_schema.json", "w"), indent=2)
 json.dump(metrics, open(OUT / "propensity_metrics.json", "w"), indent=2)
 print(json.dumps(metrics, indent=2))
+for q, g in gains_cv.items():
+    print(f"  call {q:10s} ({g['calls_per_1000_leads']:3d}/1000 leads): captures {g['share_of_activations']:.0%} of activations, {g['activations_per_100_calls']} activations per 100 calls (random: {100 * y.mean():.1f})")
 for k, m_ in stage_metrics.items():
     print(f"  stage {m_['stage']:15s} n={m_['n']:4d} base {m_['base_rate']:.1%}: AUC {m_['auc']:.3f} (all-leads {m_['auc_global']:.3f})  Brier {m_['brier']:.3f} (all-leads {m_['brier_global']:.3f})  ECE {m_['ece']:.3f} (all-leads {m_['ece_global']:.3f})")
 print(f"[{MODEL_VERSION}] nested CV AUC {cv['auc_mean']} (gap {cv['overfit_gap']}), June AUC {time_holdout['auc']} {time_holdout['auc_ci95']}, "

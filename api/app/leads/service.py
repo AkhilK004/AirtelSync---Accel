@@ -59,6 +59,43 @@ def compliance_hold(l: dict) -> str | None:
     return None
 
 
+@lru_cache(maxsize=1)
+def _quote_accepted_rates() -> tuple[float, float]:
+    """Activation rate after quote acceptance, (with GSTIN, without), from the leads data (finding 1: ~50% vs ~16%)."""
+    L = get_data().leads
+    q = L[L["stage_reached"].isin(["Quote accepted", "KYC complete", "Activated"])]
+    r = q.groupby(q["has_gstin"].astype(bool))["activated"].mean()
+    return float(r.get(True, 0.0)), float(r.get(False, 0.0))
+
+
+def _has_gstin(l: dict) -> bool | None:
+    """True / False when we know, None when we do not."""
+    raw = l.get("raw_features")
+    if raw is not None and raw.get("has_gstin") is not None:
+        return bool(raw["has_gstin"])
+    if l.get("order_id"):
+        from app.kyc import service as kyc
+        if kyc.load(l["order_id"]).declared_gstin:
+            return True
+    ctx = scoring.context(l)
+    return bool(ctx["has_gstin"]) if (ctx.get("employees") or l.get("quote_id")) else None
+
+
+def next_action(l: dict) -> dict | None:
+    """The concrete step for the person working the lead (A65). Beyond a score: GSTIN is the gate at the quote -> KYC step."""
+    hold = l.get("compliance_hold")
+    if hold:
+        return {"code": "restore_gstin", "text": f"{HOLD_TEXT.get(hold, 'GSTIN not active')}: GST-only products cannot be sold. Help the owner restore the GSTIN with the tax office, or switch to the Udyam-number KYC path."}
+    if l.get("stage_reached") in ("kyc", "order") and _has_gstin(l) is False:
+        w, wo = _quote_accepted_rates()
+        return {"code": "kyc_assist_udyam", "text": f"No GSTIN after quote acceptance: offer the Udyam-number KYC path (Udyam lookup + utility bill) and help with the paperwork. "
+                                                      f"Only {wo:.0%} of such leads activate vs {w:.0%} with a GSTIN."}
+    return None
+
+
+HOLD_TEXT = {"gstin_cancelled": "GSTIN is Cancelled", "gstin_suspended": "GSTIN is Suspended", "gstin_inactive": "GSTIN is not active"}
+
+
 def expected_value_paise(l: dict) -> int:
     """Expected monthly revenue if called = P(activate) x median monthly bundle value of the lead's segment (A62). 0 while on compliance hold."""
     if l.get("score") is None or l.get("compliance_hold"):
@@ -137,7 +174,7 @@ def refresh() -> int:
 
 def _enrich(l: dict) -> dict:
     """Scores, checks compliance and routes a lead once, then persists (so the list is cheap afterwards)."""
-    if l.get("score") is not None and "compliance_hold" in l and l.get("score_stage") == l["stage_reached"]:
+    if l.get("score") is not None and "compliance_hold" in l and "next_action" in l and l.get("score_stage") == l["stage_reached"]:
         return l  # already scored for this stage (a lead that moves to a later stage is re-scored with that stage's model, A64)
     ctx = scoring.context(l)
     prob, reasons = scoring.score_lead(l)
@@ -150,6 +187,7 @@ def _enrich(l: dict) -> dict:
     l["compliance_hold"] = compliance_hold(l)
     if l["compliance_hold"]:
         l["route_to"] = "compliance"  # KYC-assist / GST-restoration desk, not a sales queue
+    l["next_action"] = next_action(l)
     get_repo().put("leads", l["id"], l)
     return l
 
@@ -166,7 +204,7 @@ def row(l: dict) -> dict:
     return {"id": l["id"], "name": _name(l), "segment": l.get("segment"), "stage": l["stage_reached"], "reason": l["reason"], "route": l["route_to"],
             "partner_code": l.get("partner_code"), "territory_team": team_for_city(l.get("city")), "city": l.get("city"), "score": l.get("score"),
             "score_reasons": l.get("score_reasons", []),
-            "expected_value_paise": (ev := expected_value_paise(l)), "expected_value_display": fmt_inr(ev), "compliance_hold": l.get("compliance_hold"), "age_hours": round(_age_minutes(l["created_at"]) / 60, 1), "status": l["status"],
+            "expected_value_paise": (ev := expected_value_paise(l)), "expected_value_display": fmt_inr(ev), "compliance_hold": l.get("compliance_hold"), "next_action": l.get("next_action"), "age_hours": round(_age_minutes(l["created_at"]) / 60, 1), "status": l["status"],
             "order_id": l.get("order_id"), "quote_id": l.get("quote_id")}
 
 

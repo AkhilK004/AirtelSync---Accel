@@ -75,6 +75,17 @@ def test_stage_scores_are_comparable_across_stages():
     assert score(row, stage="nonsense")[0] == score(row, stage=None)[0]
 
 
+# ------------------------------------------------------------------ gain chart (call-centre view)
+def test_gain_chart_beats_random_calls(m):
+    for g in (m["gains_cv_oof"], m["time_holdout"]["gains"]):
+        shares = [g[k]["share_of_activations"] for k in ("top_10pct", "top_20pct", "top_30pct", "top_50pct")]
+        assert shares == sorted(shares)
+        for k, q in (("top_10pct", 0.1), ("top_20pct", 0.2), ("top_30pct", 0.3), ("top_50pct", 0.5)):
+            assert g[k]["share_of_activations"] > q * 1.2 and g[k]["lift_vs_random_calls"] > 1.2   # clearly better than random calls
+    assert m["gains_cv_oof"]["top_30pct"]["share_of_activations"] >= 0.55
+    assert m["gains_cv_oof"]["top_50pct"]["activations_per_100_calls"] > 100 * 0.0736 * 1.4
+
+
 # ------------------------------------------------------------------ train/serve parity
 def test_serving_row_provides_every_model_input():
     ctx = dict(business_type="Pharmacy", employees=6, locations=1, city_tier=1, language="hi", tools=["Accel mobile"], wants=[],

@@ -88,6 +88,32 @@
       "ece_global": 0.5157
     }
   },
+  "gains_cv_oof": {
+    "top_10pct": {
+      "calls_per_1000_leads": 100,
+      "share_of_activations": 0.239,
+      "activations_per_100_calls": 17.6,
+      "lift_vs_random_calls": 2.39
+    },
+    "top_20pct": {
+      "calls_per_1000_leads": 200,
+      "share_of_activations": 0.443,
+      "activations_per_100_calls": 16.3,
+      "lift_vs_random_calls": 2.21
+    },
+    "top_30pct": {
+      "calls_per_1000_leads": 300,
+      "share_of_activations": 0.582,
+      "activations_per_100_calls": 14.3,
+      "lift_vs_random_calls": 1.94
+    },
+    "top_50pct": {
+      "calls_per_1000_leads": 500,
+      "share_of_activations": 0.812,
+      "activations_per_100_calls": 12.0,
+      "lift_vs_random_calls": 1.62
+    }
+  },
   "time_holdout": {
     "n_train": 3296,
     "n_test": 1704,
@@ -132,7 +158,33 @@
         "pred_mean": 0.168,
         "actual": 0.167
       }
-    ]
+    ],
+    "gains": {
+      "top_10pct": {
+        "calls_per_1000_leads": 99,
+        "share_of_activations": 0.22,
+        "activations_per_100_calls": 16.5,
+        "lift_vs_random_calls": 2.21
+      },
+      "top_20pct": {
+        "calls_per_1000_leads": 199,
+        "share_of_activations": 0.449,
+        "activations_per_100_calls": 16.8,
+        "lift_vs_random_calls": 2.25
+      },
+      "top_30pct": {
+        "calls_per_1000_leads": 299,
+        "share_of_activations": 0.559,
+        "activations_per_100_calls": 13.9,
+        "lift_vs_random_calls": 1.86
+      },
+      "top_50pct": {
+        "calls_per_1000_leads": 500,
+        "share_of_activations": 0.827,
+        "activations_per_100_calls": 12.3,
+        "lift_vs_random_calls": 1.65
+      }
+    }
   },
   "shuffled_label_auc": 0.4921,
   "learning_curve": [
