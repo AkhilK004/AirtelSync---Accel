@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-
+from app import clock
 from pydantic import BaseModel, Field
 
 from app.advisor.slots import Slots
@@ -9,7 +8,7 @@ from app.models.engine import Note
 
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return clock.now_iso()  # one demo clock for sessions, events, orders and leads
 
 
 class AdvisorSession(BaseModel):

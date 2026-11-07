@@ -10,6 +10,17 @@ EVENT_NAMES = {"advisor_started", "slot_filled", "recommendation_shown", "quote_
                "tracker_viewed", "handoff_requested"}
 
 
+_SEEDING = False  # set by app/seed.py so demo events are flagged (props.seed) and the funnel panel can say so
+
+
+def set_seeding(on: bool) -> None:
+    global _SEEDING
+    _SEEDING = on
+
+
 def log_event(name: str, ref_id: str, props: dict | None = None) -> None:
     assert name in EVENT_NAMES, name
-    get_repo().put("events", new_id(), {"ts": now_iso(), "name": name, "ref_id": ref_id, "props": props or {}})
+    p = dict(props or {})
+    if _SEEDING:
+        p["seed"] = True
+    get_repo().put("events", new_id(), {"ts": now_iso(), "name": name, "ref_id": ref_id, "props": p})

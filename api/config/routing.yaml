@@ -1,0 +1,14 @@
+# Lead routing inputs (PLAN Phase 7). MOCK directory: fictional partners and field-team regions for the demo.
+# Rules (app/leads/service.py): multi-site / manufacturer / assisted -> field_sales;
+# partner_code on the lead OR lead city covered by a partner -> partner (attribution kept); everything else -> telesales (sorted by score).
+partners:
+  - {code: PRT-NORTH-01, name: "Sharma Digital Services (mock)", cities: [Lucknow, Patna, Jaipur, Delhi]}
+  - {code: PRT-WEST-02, name: "Konkan Connect (mock)", cities: [Pune, Nashik, Surat, Vadodara, Ahmedabad]}
+  - {code: PRT-SOUTH-03, name: "Southern Net Partners (mock)", cities: [Kochi, Coimbatore, Mysuru, Visakhapatnam]}
+# Digital sales in a territory are credited to that territory's field team (shown as a column, protects channel conflict).
+field_teams:
+  West: [Maharashtra, Gujarat, Goa]
+  North: [Delhi, Punjab, Rajasthan, Uttar Pradesh, Haryana]
+  South: [Karnataka, Kerala, Tamil Nadu, Andhra Pradesh, Telangana]
+  East: [West Bengal, Bihar, Odisha, Jharkhand]
+  Central: [Madhya Pradesh, Chhattisgarh]

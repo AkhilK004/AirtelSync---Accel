@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:3000"
     GST_RATE: float = 0.18
     DATA_DIR: str = "../data/raw"
+    SEED_ON_START: bool = False  # demo: seed back-office leads + 3 live orders at startup
 
     # Tunable business constants (see docs/assumptions.md)
     TODAY: str = "2026-07-15"  # dataset README: "today" for date checks

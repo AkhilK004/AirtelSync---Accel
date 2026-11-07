@@ -7,12 +7,15 @@ from app.config import settings
 from app.data.loaders import get_data
 from app import errors
 from app import logging as pii_logging
-from app.routers import admin, advisor, checkout, consent, health, kyc, mocks, orders, quotes
+from app.routers import admin, advisor, backoffice, checkout, consent, health, kyc, mocks, orders, quotes
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     get_data()  # load once at startup
+    if settings.SEED_ON_START:
+        from app.seed import seed_demo
+        seed_demo(reset=False)
     yield
 
 
@@ -33,3 +36,4 @@ app.include_router(consent.router)
 app.include_router(kyc.router)
 app.include_router(orders.router)
 app.include_router(admin.router)
+app.include_router(backoffice.router)

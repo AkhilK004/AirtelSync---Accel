@@ -113,6 +113,12 @@ class AppData:
         g = self.leads.groupby("business_type")["segment"].agg(lambda x: x.value_counts().index[0])
         return g.to_dict()
 
+    def city_states(self) -> dict[str, str]:
+        return self.leads.groupby("city")["state"].first().to_dict()
+
+    def segment_median_spend(self) -> dict[str, int]:
+        return self.leads.groupby("segment")["monthly_telecom_spend_inr"].median().astype(int).to_dict()
+
     def counts(self) -> dict[str, int]:
         return {
             "products": len(self.catalogue), "leads": len(self.leads),

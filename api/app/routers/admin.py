@@ -53,3 +53,11 @@ def cancel(order_id: str, x_admin_token: str | None = Header(None), lang: str = 
     o = service.cancel(order_id, "cancelled_by_ops")
     audit("admin", "order_cancel", order_id, {})
     return service.view(o, lang)
+
+
+@router.post("/reset")
+def reset(x_admin_token: str | None = Header(None)):
+    """Demo: wipe the in-memory store and re-seed back-office leads and the 3 demo orders."""
+    _auth(x_admin_token)
+    from app.seed import seed_demo
+    return seed_demo(reset=True)
