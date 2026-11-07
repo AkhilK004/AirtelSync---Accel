@@ -52,11 +52,11 @@ Screens: advisor chat → quote with toggles → checkout → consent + KYC → 
 ### 7. Channel model (Q4)
 - **Field force:** multi-site, manufacturers, assisted leads (site survey).
 - **Partners:** leads with their code or in their cities; attribution preserved for commission.
-- **Telesales:** the rest, sorted by expected monthly value (propensity x typical bundle value). Propensity v2: nested-CV AUC 0.72, June holdout 0.73 (95% CI 0.69-0.77), top-decile lift 2.2x, calibrated (ECE 0.02); trained only on facts the advisor collects; language deliberately excluded (fairness).
+- **Telesales:** the rest, sorted by expected monthly value (propensity x typical bundle value). Propensity v3: scored per funnel stage so late leads rank correctly (calibration error at KYC stage 0.52 -> 0.08); nested-CV AUC 0.72, June holdout 0.73 (95% CI 0.69-0.77); **calling the top 30% of leads reaches 58% of activations** (chart: `gain_chart.png`); trained only on facts the advisor collects; language deliberately excluded (fairness). Leads without a GSTIN at the KYC stage get a concrete task: offer the Udyam path (16% activate vs 50% with a GSTIN).
 - **Compliance hold:** a Cancelled / Suspended GSTIN is never pushed to sales, however likely to convert (22 such activations in the data).
 - **Credit sharing:** digital sales in a territory are credited to that territory's field team (protects against channel conflict).
 - Why: field sales cost ₹24.3k and partners ₹20.9k per activation vs referral ₹4.1k, inbound ₹5.1k, website ₹6.4k: send the people only where a visit is needed.
-- Chart: `cac_by_source.png`.
+- Charts: `cac_by_source.png`, `gain_chart.png`.
 
 ### 8. Unit economics
 | Segment | Cost per activation today | Median monthly value | Revenue payback |

@@ -54,7 +54,7 @@ No out-of-order stage dates; every activated lead has `kyc_complete_date`; `days
 - Reasons are the 3 largest coefficient x value contributions, e.g. `['Source: Referral ↑', 'Has GSTIN ↑', 'Not with Accel today ↓']`.
 
 ## 6. Charts (`docs/charts/`)
-`funnel.png`, `activation_by_gstin.png`, `quote_to_kyc_by_gstin.png`, `activation_by_segment.png`, `activation_by_source.png`, `cac_by_source.png`, `churn_by_prior_internet.png`, `churn_by_followup_calls.png`.
+`funnel.png`, `activation_by_gstin.png`, `quote_to_kyc_by_gstin.png`, `activation_by_segment.png`, `activation_by_source.png`, `cac_by_source.png`, `churn_by_prior_internet.png`, `churn_by_followup_calls.png`, `gain_chart.png` (propensity gain chart, `scripts/make_gain_chart.py`).
 
 ## 7. Implications for build
 GSTIN-less path must be first-class (Udyam + PAN/bill) and flagged as higher risk in propensity; micro bundles need a low-cost digital path (referral/WhatsApp-assisted, partner commission) rather than field visits; check GSTIN **status** in KYC; one instant transparent quote; tracker to cut status calls; route multi-site/manufacturers to field force.

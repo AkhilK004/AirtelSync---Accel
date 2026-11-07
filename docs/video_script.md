@@ -9,7 +9,7 @@ Setup: API with `SEED_ON_START=true`, web built with the demo token, phone-size 
 | 1:10–1:35 | `/hi/quote/…` | One big total. Toggle **CCTV** on: total updates from the server and the toast says what it pulled in. Open price breakdown (GST, setup). Mention assumptions chips. |
 | 1:35–2:15 | `/hi/kyc/…` | Consent screen (3 languages, marketing off). Enter a GSTIN → prefill from registry. Upload the **K11** documents: result says the bill is older than 90 days with the fix "upload a bill dated after 16 Apr 2026". Then show **K06**: GSTIN typo caught by the check digit. |
 | 2:15–2:35 | `/hi/track/…?demo=1` | Digital products already "चालू"; physical ones show install ETA; press Advance to show technician assigned and the WhatsApp-style messages. |
-| 2:35–2:50 | `/backoffice` | Ranked leads with reasons, route column (field / partner / telesales), funnel panel with baseline vs target. |
+| 2:35–2:50 | `/backoffice` | Leads ranked by expected monthly value, each with its three score reasons. Point at a **KYC assist: Udyam path** badge (a GSTIN-less lead stuck at KYC: the system says what to do, not just a score) and the red **GSTIN suspended** row in the Compliance hold queue (never pushed to sales). Funnel panel with baseline vs target. Say: "Calling the top 30% of leads reaches 58% of activations." |
 | 2:50–3:00 | Slide: targets | "Seven to fourteen percent activation, seventeen days to five, three status calls to under half a call." |
 
 ## Recording checklist
