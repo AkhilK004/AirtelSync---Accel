@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from app.config import MULTI_SITE_MAX_LOCATIONS, MULTI_SITE_MIN_LOCATIONS
+from app.config import (MANUFACTURING_KEYWORDS, MULTI_SITE_MAX_LOCATIONS, MULTI_SITE_MIN_LOCATIONS,
+                        PROFESSIONAL_KEYWORDS)
 from app.data.loaders import get_data
 from app.models.engine import Note, Profile, Segment
 
@@ -16,10 +17,15 @@ def classify(profile: Profile) -> tuple[Segment, list[Note]]:
     bt = (profile.business_type or "").strip().lower()
     base = _SEG_MAP.get(known.get(bt)) if bt in known else None
     if base is None:
-        # unknown business type: infer from size only
-        base = Segment.MICRO_RETAIL if profile.employees <= 6 else Segment.PROFESSIONAL
-        notes.append(Note(key="business_type_unknown", params={"employees": profile.employees},
-                          text=f"We could not match your business type, so we sized you by team ({profile.employees} people)."))
+        # unknown business type: generic keywords first (clinic, factory...), then size only
+        if any(k in bt for k in MANUFACTURING_KEYWORDS):
+            base = Segment.MANUFACTURER
+        elif any(k in bt for k in PROFESSIONAL_KEYWORDS):
+            base = Segment.PROFESSIONAL
+        else:
+            base = Segment.MICRO_RETAIL if profile.employees <= 6 else Segment.PROFESSIONAL
+            notes.append(Note(key="business_type_unknown", params={"employees": profile.employees},
+                              text=f"We could not match your business type, so we sized you by team ({profile.employees} people)."))
     if base == Segment.MANUFACTURER:
         return base, notes
     if profile.locations >= MULTI_SITE_MIN_LOCATIONS:

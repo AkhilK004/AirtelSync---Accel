@@ -46,3 +46,8 @@ MULTI_SITE_MIN_LOCATIONS = 3   # data: all multi-site leads have 3-12 sites; oth
 MULTI_SITE_MAX_LOCATIONS = 10  # above this -> assisted (field force); plan default
 PRICE_POINT_RULE = "midpoint"  # unit price = midpoint of [min,max] rounded half-up to whole rupee
 ASSISTED_CALLBACK_HOURS = 4
+
+# generic business-type keywords used only when the type is not in the leads data (docs/assumptions.md A20)
+MANUFACTURING_KEYWORDS = ("manufactur", "factory", "workshop", "plant", "unit")
+PROFESSIONAL_KEYWORDS = ("clinic", "doctor", "lab", "office", "firm", "studio", "agency", "centre", "center", "consult", "academy")
+MAX_MESSAGES_PER_SESSION = 80
